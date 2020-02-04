@@ -25,11 +25,13 @@ class Logistic_Regression:
 
 	def __init__(self, dataname):
     	
-    	self.dataname = dataname
-    	# Load the datasets into NumPy objects
-    	loadData(self.Xdata, self.Ytarget)
+    		self.dataname = dataname
+    		# Load the datasets into NumPy objects
+    		loadData(self.Xdata, self.Ytarget)
     	
-    	# TODO: Randomize the datasets
+    		# TODO: Randomize the datasets
+		#
+		#
 
 
 	def fit(X, Y, learningRate, iterNum, eps):
@@ -115,7 +117,10 @@ class Logistic_Regression:
 		# Yhat = sigma((wstar.T)(X))
 
 		# TODO: select sets for training 
+		#
+		#
 
+		# Compute Yhat
 		wstar = self.fit(Xfortrain, Yfortrain, learningRate, iterNum, eps)
 		designMatrix = np.dot(Xfortest, wstar)
 		for index in range(len(designMatrix)):
