@@ -38,7 +38,16 @@ def encode(data):
 #================== matrix bilder for ionosphere.txt ======================
 def ionosphere_builder():
     global iono_X, iono_y
-    iono_X = genfromtxt('ionosphere.txt', dtype='float32', delimiter=',', filling_values = '0.', usecols = (range(34)))
+    iono_X = genfromtxt('ionosphere.txt', dtype='float32', delimiter=',', filling_values = -99, usecols = (range(34)))
+    print(iono_X.shape)
+
+    # Remove malsamples
+    for i in range(len(iono_X)):
+        for j in range(len(iono_X[i])):
+            if iono_X[i][j] == -99 :
+                iono_X = np.delete(iono_X, i, 0)
+    #print(iono_X.shape)
+
     # Remove feature at column 1 
     iono_X = np.delete(iono_X, 1, 1)
     iono_y = genfromtxt('ionosphere.txt', dtype='S8', delimiter=',', filling_values = 'g', usecols = (34))
@@ -47,46 +56,25 @@ def ionosphere_builder():
     #print(iono_X)[1][3]
     #print(iono_y)
 
-#================== OneHotEncode for adult.txt ============================ 
-#Column 1 workclass
-adult_col1 = ['State-gov', 'Self-emp-not-inc', 'Private', 'Federal-gov', 'Local-gov']
-result_adult_col1 = encode(adult_col1)
-#print(result_adult_col1)
-
-#Column 3 education
-adult_col3 = ['Bachelors', 'HS-grad', 'Masters', 'Some-college', 'Doctorate', 'Assoc', 'Prof-school', 'Other']
-result_adult_col3 = encode(adult_col3)
-#print(result_adult_col3)
-
-#Column 6 marital-status
-adult_col5 = ['Never-married', 'Married', 'Divorced', 'Separated']
-result_adult_col5 = encode(adult_col5)
-#print(result_adult_col5)
-
-#Column 8 race
-adult_col8 = ['White', 'Black', 'Asian-Pac-Islander', 'Amer-Indian-Eskimo', 'Other']
-result_adult_col8 = encode(adult_col8)
-#print(result_adult_col8)
-
-#Column 9 sex
-adult_col9 = ['Male', 'Female']
-result_adult_col9 = encode(adult_col9)
-#print(result_adult_col9)
-
-#Column 13
-adult_col13 = ['United-States', 'Other']
-result_adult_col13 = encode(adult_col13)
-#print(result_adult_col13)
-
-#Column y
-adult_y = ['<=50K', '>50K']
-result_adult_y = encode(adult_y)
-#print(result_adult_y)
-
 #================== matrix bilder for adult.txt ===========================
 def adult_builder():
     global adult_X, adult_y
     adult_X = genfromtxt('adult.txt', dtype='S20', delimiter=',', filling_values = 'MAL_SAMPLE', usecols = (range(14)))
+    adult_y = genfromtxt('adult.txt', dtype='S8', delimiter=',', filling_values = 'MAL_SAMPLE', usecols = (14))
+    #print(adult_X.shape)
+
+    #Delete malfeatures
+    adult_X = np.delete(adult_X, [7, 8, 11, 12], 1)
+
+    #One Hot Encode of each column
+
+    for i in range(len(adult_X[0])):
+        if not adult_X[0][i].isdigit():
+            data = adult_X[:, i]
+            #print(data)
+            print(encode(data))
+
+    #adult_X = finalmatrix\
     #print(adult_X.shape)
 
     #Delete malsamples 
@@ -94,13 +82,14 @@ def adult_builder():
         for j in range(len(adult_X[i])):
             if adult_X[i][j] == 'MAL_SAMPLE' :
                 adult_X = np.delete(adult_X, i, 0)
-    print(adult_X)
+    #print(adult_X)
     #print(adult_X.shape)
 
-    #Delete malfeatures
-    adult_X = np.delete(adult_X, [7, 8, 11, 12], 1)
-    print(adult_X)
+    
+    #print(adult_X)
     #print(adult_X.shape)
+
+
 
 
 #ionosphere_builder()
