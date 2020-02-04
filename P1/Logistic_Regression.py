@@ -19,8 +19,10 @@ class Logistic_Regression:
 
 
 	# MAY BE USEFUL
+	# Yhat = sigma(logit)
 	Yhat = [[]]
-
+	# binary prediction {0,1}
+	prediction = [[]]
 
 
 	def __init__(self, dataname):
@@ -126,7 +128,12 @@ class Logistic_Regression:
 		for index in range(len(designMatrix)):
 			logit = designMatrix[index][0]
 			Yhat[index][0] = self.logistic_function(logit)
-			# print yhat[index][0]		
+			# Convert to binary by thresholding 0.5
+			if Yhat[index][0]>=0.5:
+				prediction[index][0] = 1;
+			else:
+				prediction[index][0] = 0;
+			# print prediction[index][0]		
 
 
 	def logistic_function(logit):
@@ -137,5 +144,8 @@ class Logistic_Regression:
 
 	def evaluate_acc():
 		truthTable(Yhat, Y)
+		# TODO: evaluations
+		#
+		#
 
 	def selectTestsets(self):
