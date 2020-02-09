@@ -25,19 +25,22 @@ def mean(numbers):
 # calculate the standard deviation of a list of numbers
 def stdev(numbers):
 	avg = mean(numbers)
-	variance = float(sum([(x-avg)**2 for x in numbers]) / float(len(numbers)-1))
+	variance = float(sum([(x-avg)**2 for x in numbers]) / float(len(numbers)))
 	return float(sqrt(variance))
 
 # calculate the Gaussian probability distribution function for x
 def calculate_probability(x, mean, stdev):
-	#exponent = exp(-((x-mean)**2 / (2 * stdev**2 )))
-
-	#return (1. / float((sqrt(2 * pi) * stdev))) * exponent
+    exponent = exp(-((x-mean)**2 / (2 * stdev**2 )))
+    if not stdev == 0:
+        return (1 / (sqrt(2 * pi) * stdev)) * exponent
+    else:
+        return 1.    
+    '''
     if not stdev == 0:
         return scipy.stats.norm(mean, stdev).cdf(x)
     else: 
         return 1    
-
+    '''
 #=========================== naiveBayesClassifer ==========================
 def nbc(sample, matrix_X, matrix_y):
     
@@ -54,9 +57,9 @@ def nbc(sample, matrix_X, matrix_y):
         if matrix_y[i] == 0:
             count += 1
     p_prior_0 = float(count) / float(num_row)
-    print(count)
-    print(num_row)
-    print(p_prior_0)
+    #print(count)
+    #print(num_row)
+    #print(p_prior_0)
     p_prior_1 = 1. - p_prior_0
 
     # Step_2
@@ -76,8 +79,8 @@ def nbc(sample, matrix_X, matrix_y):
                 if matrix_X[j][i] == sample[i] and matrix_y[j] == 1:   
                     count_d_1 += 1
             # accumulate p 
-            p_discrete_0 = p_discrete_0 * (count_d_0/num_row)    
-            p_discrete_1 = p_discrete_1 * (count_d_1/num_row)         
+            p_discrete_0 = p_discrete_0 * (float(count_d_0)/float(num_row))   
+            p_discrete_1 = p_discrete_1 * (float(count_d_1)/float(num_row))          
         # continous numbers ** gaussian distribution **
         else: 
             #load features according to result number
@@ -91,47 +94,33 @@ def nbc(sample, matrix_X, matrix_y):
 
             mean_0, stdev_0 = mean(nums_0), stdev(nums_0)
             mean_1, stdev_1 = mean(nums_1), stdev(nums_1)
-
-
-            #Total continous probability 
-            #print(calculate_probability(matrix_y[i], mean_0, stdev_0))
-            #print(calculate_probability(matrix_y[i], mean_1, stdev_1))
-
-            #print(p_continous_1)
-
-            #print(matrix_y[i])
-
-            p_continous_0 = p_continous_0 * calculate_probability(matrix_y[i], mean_0, stdev_0)
-            p_continous_1 = p_continous_1 * calculate_probability(matrix_y[i], mean_1, stdev_1)
-
-            #print(calculate_probability(matrix_y[i], mean_0, stdev_0))
-            #print(calculate_probability(matrix_y[i], mean_1, stdev_1))
-
-            #print(p_continous_0)
-            #print(p_continous_1)
+            
+            p_continous_0 = p_continous_0 * calculate_probability(sample[i], mean_0, stdev_0)
+            p_continous_1 = p_continous_1 * calculate_probability(sample[i], mean_1, stdev_1)
 
     # Total prior * likelihood 
     p_0 = p_prior_0 * p_discrete_0 * p_continous_0
     p_1 = p_prior_1 * p_discrete_1 * p_continous_1
 
-    print(p_0)
-    print(p_1)
+    #print(p_0)
+    #print(p_1)
 
     # Output
     if p_0 > p_1:
-        print(0)
+        #print(0)
         return 0     
     else:
-        print(1)
+        #print(1)
         return 1    
 
 #=========================== Test BayesClassifer ==========================
 
 matrix_X, matrix_y = ionosphere_builder()
 
-print(matrix_y)
-sample = matrix_X[1]
-#print(sample)
-#print(matrix_X[10][10])
-
-result = nbc(sample, matrix_X, matrix_y)
+#print(matrix_y)
+#sample = matrix_X[0]
+count = 0
+for i in range(200):
+    if nbc(matrix_X[i], matrix_X, matrix_y) == matrix_y[i]:
+        count += 1
+print(float(count)/200.)        
