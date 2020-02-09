@@ -1,4 +1,4 @@
-#author: Yuhang Zhang & Olivia Xu & Diyang Zhang
+#author: Yuhang Zhang & Oliva Xu & Diyang Zhang
 #This class contains functions that build and analysis dataset samples.
 #=================================imports==================================
 import math
@@ -63,7 +63,7 @@ def ionosphere_builder():
     # load iono_X from iono_matrix 
     iono_X = iono_matrix[0:len(iono_matrix)-1,0:34].copy()
 
-    # load iono-y form iono_matrix and encode it
+    # load iono_y form iono_matrix and encode it
     iono_y = encode_X(iono_matrix[0:len(iono_matrix)-1,34].copy())
 
     # convert the datatype of X from "string" to "float"
@@ -88,10 +88,10 @@ def adult_builder():
     # shuffle matrix 
     np.random.shuffle(adult_matrix)
 
-    # load iono_X from iono_matrix 
+    # load adult_X from iono_matrix 
     adult_X = adult_matrix[0:len(adult_matrix)-1,0:14].copy()
 
-    # load iono-y form iono_matrix and encode it
+    # load adult_y form iono_matrix and encode it
     adult_y = encode_X(adult_matrix[0:len(adult_matrix)-1,14].copy())
 
     #Integer Encode of each column
@@ -128,10 +128,10 @@ def bank_builder():
     # shuffle matrix 
     np.random.shuffle(bank_matrix)
 
-    # load iono_X from iono_matrix 
+    # load bank_X from iono_matrix 
     bank_X = bank_matrix[0:len(bank_matrix)-1,0:16].copy()
 
-    # load iono-y form iono_matrix and encode it
+    # load bank_y form iono_matrix and encode it
     bank_y = encode_X(bank_matrix[0:len(bank_matrix)-1,16].copy())
 
     numRow, numCol = bank_X.shape
@@ -168,10 +168,10 @@ def breastCancer_builder():
     # shuffle matrix 
     np.random.shuffle(cancer_matrix)
 
-    # load iono_X from iono_matrix 
+    # load cancer_X from iono_matrix 
     cancer_X = cancer_matrix[0:len(cancer_matrix)-1,0:9].copy()
 
-    # load iono-y form iono_matrix and encode it
+    # load cancer_y form iono_matrix and encode it
     cancer_y = encode_X(cancer_matrix[0:len(cancer_matrix)-1,9].copy())
 
 
@@ -201,7 +201,7 @@ def breastCancer_builder():
     return helper_X, cancer_y
 
 
-### Helper function to assign a value to string
+### Helper function to assign a value to a string
 def stoi(str):
     result = 0
     for i in range(len(str)):
