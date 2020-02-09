@@ -3,6 +3,9 @@ import numpy as np
 import math
 from numpy.linalg import inv
 from dataProcess import ionosphere_builder
+from dataProcess import adult_builder
+from dataProcess import breastCancer_builder
+from dataProcess import bank_builder
 
 
 class Logistic_Regression:
@@ -10,46 +13,164 @@ class Logistic_Regression:
 	# Data Matrix X
 	Xdata = [[]]
 	# Target Matrix Y
-	Ytarget = [[]]
-	# Member Viariables for evalation
+	Ytarget = []
+	
+	### Member Viariables for evalation
+	# True-positive
 	tp = 0
+	# True-negative
 	tn = 0
+	# False-positive
 	fp = 0
+	# False-negative
 	fn = 0
 
+	### Hyper-parameters
+	# Learning Rate
+	lrate = 0.01
+	# Iteration Number
+	inum = 100
+	# Epsilon
+	eps = 1e-2
 
-	lrate = 0.1
-	inum = 500
-	eps = 0.01
+	# Distribution of original datasets
+	sizeTrain = 0
+	sizeValidation = 0
+	sizeTest = 0
 
-	# MAY BE USEFUL
-	Yhat = []
+	# Testsets
+	Xtest = [[]]
+	Ytest = []
+	Yhattest = []
 
 
 	def __init__(self, dataname):
 		
 		self.dataname = dataname
 		# Load the datasets into NumPy objects
-		self.Xdata,self.Ytarget = ionosphere_builder()
+		# NOTE: Data has been already randomized in dataProcess.py
+		if dataname == "ionosphere":
+			self.Xdata,self.Ytarget = ionosphere_builder()
+		if dataname == "adult":
+			self.Xdata,self.Ytarget = adult_builder()
+		if dataname == "breast-cancer":
+			self.Xdata,self.Ytarget = breastCancer_builder()
+		if dataname == "bank":
+			self.Xdata,self.Ytarget = bank_builder()
 		# Add Bias (concatenate a 1 to x)
 		self.Xdata = np.insert(self.Xdata, 0, 1, axis=1)
-		# TODO: Randomize the datasets
+		# Dataset Distribution
+		numRow, numCol = self.Xdata.shape
+		# 80% for train (DEFAULT)
+		self.sizeTrain = int(numRow*0.8)
+		# 10% for Validation (DEFAULT)
+		self.sizeValidation = int(numRow*0.1)
+		# Last 10% for test (DEFAULT)
+		self.sizeTest = numRow-self.sizeTrain-self.sizeValidation
+		self.Xtest = self.Xdata[numRow-self.sizeTest:, :]
+		self.Ytest = self.Ytarget[numRow-self.sizeTest:]
+	
+
+	def selectTrainSets(self):
+		return self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]	
 
 
 	def fit(self, X, Y, learningRate, iterNum, epsilon):
 
-		### Direct Solution: w*=((X.T)(X))^(-1)(X.T)(Y)
+		### Analytical Method
+		# Direct Solution: w*=((X.T)(X))^(-1)(X.T)(Y)
 		# Compute X.T dot X
 		product1 = np.dot(X.T, X)
 		# Compute X.T dot Y
 		product2 = np.dot(X.T, Y)
 		# Compute w*
-		wstar = inv(product1).dot(product2)
-
-		### Call gradientDescent
-		self.gradientDescent(X, Y, learningRate, iterNum, epsilon)
+		try:
+			wstar = inv(product1).dot(product2)
+		except np.linalg.LinAlgError as err:
+			for i in range(len(product1)):
+				product1[i][i] += 0.000001
+			wstar = inv(product1).dot(product2)
+		### Gradient-Descent Method
+		### Uncomment the following lines for use
+		# Call gradientDescent method 
+		# wstar = self.gradientDescent(X, Y, learningRate, iterNum, epsilon)
 
 		return wstar;
+
+
+	def predict(self):
+
+		### Do prediction on TEST sets
+		# Yhat = sigma((wstar.T)(X))
+
+		Xfortrain, Yfortrain = self.selectTrainSets()
+		wstar = self.fit(Xfortrain, Yfortrain, self.lrate, self.inum, self.eps)
+		designMatrix = np.dot(self.Xtest, wstar)
+		
+		for index in range(len(designMatrix)):
+			logit = designMatrix[index]
+			self.Yhattest.append(self.logistic_function(logit))
+
+		Yresult = self.thresholding(self.Yhattest);
+		accuracy = self.evaluate_acc(Yresult, self.Ytest)
+
+		### Uncomment to see results
+		# print (Yresult)
+		# print (self.Ytest)
+		print(accuracy)
+		return accuracy
+
+
+	def predictAccuracy_kfold(self, Xtrain, Ytrain, Xvalidation, Yvalidation):
+
+		wstar = self.fit(Xtrain, Ytrain, self.lrate, self.inum, self.eps)
+		designMatrix = np.dot(Xvalidation, wstar)
+		yht = []
+		for index in range(len(designMatrix)):
+			logit = designMatrix[index]
+			yht.append(self.logistic_function(logit))
+
+		Yresult = self.thresholding(yht);
+		accuracy = self.evaluate_acc(Yresult, Yvalidation)
+		return accuracy
+
+
+	def kfoldCrossValidation(self, k):
+
+		numRow, numCol = self.Xdata.shape
+		size_kfoldValidation = int((self.sizeTrain+self.sizeValidation)/k)
+		
+		#print(self.sizeTest)
+		X_excludeTest = self.Xdata[0:numRow-self.sizeTest+1, :]
+		Y_excludeTest = self.Ytarget[0:numRow-self.sizeTest+1]
+		#print(Y_excludeTest.shape)
+		#print(Y_excludeTest)
+
+		t_accuracy = 0;
+		for index in range(k):
+			startIndex = size_kfoldValidation*index
+			endIndex = startIndex + size_kfoldValidation - 1
+			Xvalidation = X_excludeTest[startIndex:endIndex+1, :]
+			Yvalidation = Y_excludeTest[startIndex:endIndex+1]
+			if index==k-1:
+				Xvalidation = X_excludeTest[startIndex:, :]
+				Yvalidation = Y_excludeTest[startIndex:]
+
+			if index==0:
+				Xtrain = X_excludeTest[endIndex+1:, :]
+				Ytrain = Y_excludeTest[endIndex+1:]
+			elif index==k-1:
+				Xtrain = X_excludeTest[0:startIndex, :]
+				Ytrain = Y_excludeTest[0:startIndex]
+			else:
+				Xtrain = np.row_stack(( X_excludeTest[0:startIndex, :], X_excludeTest[endIndex+1:, :]))
+				Ytrain = np.concatenate(( Y_excludeTest[0:startIndex], Y_excludeTest[endIndex+1:]))
+
+			t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xvalidation, Yvalidation)
+
+		print(t_accuracy/k)
+		return t_accuracy/k
+
 
 
 	def gradientDescent(self, X, Y, learningRate, iterNum, epsilon):
@@ -69,7 +190,7 @@ class Logistic_Regression:
 		return w
 
 	
-	def stochastic_gradientDescent(X, Y, learningRate, iterNum, epsilon):
+	def stochastic_gradientDescent(self, X, Y, learningRate, iterNum, epsilon):
 		
 		### EXTRA FEATURE: Stochastic Gradient-Descent
 		# Refrence: Lecture 6 "SGD for logistic Regresssion"
@@ -80,7 +201,7 @@ class Logistic_Regression:
 		
 		while (np.linalg.norm(g)>epsilon) and (count<iterNum):
 			n = np.random.randint(N)
-			g = gradient(X[[n],:], Y[[n]], w)
+			g = self.gradient(X[[n],:], Y[[n]], w)
 			w = w - learningRate*g
 			count = count + 1
 
@@ -103,88 +224,40 @@ class Logistic_Regression:
 		### EXTRA FEATURE: Positive & Negative
 		for index in range(len(Yhat)):
 			if (Yhat[index]>=0.5) and (Y[index]==1):
-				tp = tp + 1;
+				self.tp = self.tp + 1;
 			if (Yhat[index]<0.5) and (Y[index]==0):
-				tn = tn + 1;
+				self.tn = self.tn + 1;
 			if (Yhat[index]>=0.5) and (Y[index]==0):
-				fp = fp + 1;
+				self.fp = self.fp + 1;
 			if (Yhat[index]<0.5) and (Y[index]==1):
-				fn = fn + 1;
+				self.fn = self.fn + 1;
 
 
-	def predict(self):
+	def evaluate_acc(self, Yresult, Y):
 
-		### Do prediction on TEST sets
-		# Yhat = sigma((wstar.T)(X))
-
-		# TODO: select sets for training 
-		Xfortrain, Yfortrain = self.selectTrainSets()
-		Xfortest = self.selectTestSets()
-		wstar = self.fit(Xfortrain, Yfortrain, self.lrate, self.inum, self.eps)
-		designMatrix = np.dot(Xfortest, wstar)
-		
-		#print(designMatrix)
-		
-		for index in range(len(designMatrix)):
-			logit = designMatrix[index]
-			self.Yhat.append(self.logistic_function(logit))
-			# print yhat[index][0]
-		print(self.Yhat)
-		print(self.Ytarget[310:320])
+		### Calculate "Accuracy"
+		count = 0
+		for index in range(len(Yresult)):
+			if (Yresult[index]==Y[index]):
+				count = count + 1
+		return count/len(Yresult)
 
 
-	def selectTrainSets(self):
-		#print(self.Xdata[0:300, :])
-		#print(self.Ytarget[0:300])
-		return self.Xdata[0:300, :], self.Ytarget[0:300]
+	def thresholding(self, yh):
 
+		### Thresholding Yhat by 0.5 to Yresult
+		Yresult = []
+		for singley in yh:
+			if (singley>=0.5):
+				Yresult.append(1)
+			else:
+				Yresult.append(0)
 
-	def selectTestSets(self):
-		return self.Xdata[310:320, :]
-
+		return Yresult
 
 	def logistic_function(self, logit):
 		return 1.0 / (1.0 + math.e**(-logit))
 
 
-	def kfcValidation(data_X,data_y,fold):
-		total_rows = np.size(data_X,0)
-		total_accuracy = 0
-		for i in range(1,fold):
 
-			# prepare training data and validation data for  k fold
-
-			vali_first_row = int(((i-1)/fold) * total_rows)
-			vali_last_row = int((i/fold) * total_rows)
-			vali_X = data_X[num_first_row,:]
-			vali_y = data_y[num_first_row,:]
-
-			for j in range(vali_first_row,vali_last_row):
-				vali_X = np.row_stack((vali_X,data_X[j,:]))
-				vali_y = np.row_stack((vali_y,data_y[j,:]))
-
-				train_X =  data_X[0,:]
-				train_y =  data_Y[0,:]
-
-				if i == 1 :
-					train_X = data_X[vali_last_row+1:,]
-					train_y = data_y[vali_last_row+1:,]
-				elif i == k :
-					train_X  = data_X[0:vali_first_row,:]
-					train_y  = data_y[0:vali_first_row,:]
-				else :
-					train_X = np.row_stack(( data_X[0:vali_first_row,:],data_X[vali_last_row+1:,:] ))
-					train_y = np.row_stack(( data_y[0:vali_first_row,:],data_y[vali_last_row+1:,:] ))
-
-					train_X = np.delete(train_X,0,0)
-					train_y = np.delete(train_X,0,0)
-
-					# use train xy, vali xy to get accuracy
-					# accuracy = ### call Function with train X ,train Y ,val_X and Val_y
-					# total_accuracy = total_accuracy + accuracy
-
-		return (total_accuracy/fold)
-
-
-	def evaluate_acc():
-		truthTable(Yhat, Y)
+		
