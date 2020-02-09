@@ -1,3 +1,4 @@
+### Author: Diyang Zhang & Yuhang Zhang & Olivia Xu
 
 import numpy as np
 import math
