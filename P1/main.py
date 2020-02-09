@@ -39,4 +39,3 @@ lga.kfoldCrossValidation(5)
 # lgb.kfoldCrossValidation(5)
 lgc.kfoldCrossValidation(5)
 # lgd.kfoldCrossValidation(5)
-
