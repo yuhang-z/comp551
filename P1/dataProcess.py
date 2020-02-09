@@ -1,4 +1,4 @@
-#author: Yuhang Zhang & Oliva Xu 
+#author: Yuhang Zhang & Olivia Xu & Diyang Zhang
 #This class contains functions that build and analysis dataset samples.
 #=================================imports==================================
 import math
@@ -78,18 +78,12 @@ def ionosphere_builder():
     # Remove feature at column 1 
     iono_X = np.delete(iono_X, 1, 1)
 
-    # Test of ionosphere_builder():
-    print(iono_X)
-    print(iono_X.shape)
-    print(iono_y)
-    print(iono_y.shape)
-    
     return iono_X, iono_y
 
 #================== matrix bilder for adult.txt ===========================
 def adult_builder():
     global adult_X, adult_y
-    adult_matrix = genfromtxt('adult.txt', dtype='S20', delimiter=',', filling_values = 'MAL_SAMPLE', usecols = (range(15)))
+    adult_matrix = genfromtxt('adult.txt', dtype='unicode', delimiter=',', filling_values = 'MAL_SAMPLE', usecols = (range(15)))
     
     # shuffle matrix 
     np.random.shuffle(adult_matrix)
@@ -99,68 +93,77 @@ def adult_builder():
 
     # load iono-y form iono_matrix and encode it
     adult_y = encode_X(adult_matrix[0:len(adult_matrix)-1,14].copy())
-    
+
     #Integer Encode of each column
-    for i in range(len(adult_X[0])):
-            if not re.match("^[0-9 ]+$", adult_X[0][i]):
-                data = adult_X[:, i-1]
-                #
-                adult_X[:, i] = encode_X(data).astype(int)
+    numRow, numCol = adult_X.shape
+    for i in range(numRow):
+        for j in range(numCol):
+            element = adult_X[i][j]
+            if not re.match("^[0-9 ]+$", element):
+                adult_X[i][j] = stoi(element)
             else:
-                adult_X[:, i] = adult_X[:, i].astype(float)     
+                adult_X[i][j] = int(element)
 
-    #Delete malfeatures
-    adult_X = np.delete(adult_X, [7, 8, 11, 12], 1)
+    helper_X = []
+    for i in range(numRow):
+        tmp = []
+        for j in range(numCol):
+            tmp.append(int(adult_X[i][j]))
+        helper_X.append(tmp)
 
-    print(adult_X)
-    print(adult_y)
+    helper_X = np.asarray(helper_X)
+    adult_y = np.asarray(adult_y)
+    # print(helper_X)
+    # print(bank_y)
 
-    b = []
-    print(adult_matrix.shape)
-    for i in range(len(adult_matrix)):
-        for j in range(len(adult_matrix[i])):
-            if adult_matrix[i][j] == ' ?':
-                b.append(i)
-    
-    for badrow in b:
-        adult_matrix = np.delete(adult_matrix, badrow, 0)
+    return helper_X, adult_y
 
-
-    return adult_X, adult_y
 
 #================== matrix bilder for bank.txt ============================
 def bank_builder():
     global bank_X, bank_y
-    bank_matrix = genfromtxt('bank.txt', dtype='S20', delimiter=';', filling_values = 'MAL_SAMPLE', usecols = (range(16)))
+    bank_matrix = genfromtxt('bank.txt', dtype='unicode', delimiter=';', filling_values = 'MAL_SAMPLE', usecols = (range(17)))
 
+    bank_matrix = bank_matrix[1: , :]
     # shuffle matrix 
     np.random.shuffle(bank_matrix)
 
     # load iono_X from iono_matrix 
-    bank_X = bank_matrix[0:len(bank_matrix)-1,0:15].copy()
+    bank_X = bank_matrix[0:len(bank_matrix)-1,0:16].copy()
 
     # load iono-y form iono_matrix and encode it
-    bank_y = encode_X(bank_matrix[0:len(bank_matrix)-1,15].copy())
+    bank_y = encode_X(bank_matrix[0:len(bank_matrix)-1,16].copy())
 
-    #Integer Encode of each column
-    for i in range(len(bank_X[0])):
-            if not re.match("^[0-9 ]+$", bank_X[0][i]):
-                data = bank_X[:, i-1]
-                #
-                bank_X[:, i] = encode_X(data).astype(int)
+    numRow, numCol = bank_X.shape
+    for i in range(numRow):
+        for j in range(numCol):
+            element = bank_X[i][j]
+            if not re.match("^[0-9 ]+$", element):
+                bank_X[i][j] = stoi(element)
             else:
-                bank_X[:, i] = bank_X[:, i].astype(float)    
+                bank_X[i][j] = int(element)
 
-    #ONE HOT ENCODING of y 
-    bank_y = encode_y(bank_y)
+    helper_X = []
+    for i in range(numRow):
+        tmp = []
+        for j in range(numCol):
+            tmp.append(int(bank_X[i][j]))
+        helper_X.append(tmp)
 
-    return bank_X, bank_y
+    helper_X = np.asarray(helper_X)
+    bank_y = np.asarray(bank_y)
+    for i in range(len(bank_y)):
+        bank_y[i] = 1-bank_y[i]
+    # print(helper_X)
+    # print(bank_y)
+
+    return helper_X, bank_y
 
 #================== matrix bilder for breast-cancer.txt =====================
 def breastCancer_builder():
     global cancer_X, cancer_y
 
-    cancer_matrix = genfromtxt('breast-cancer.txt', dtype='S20', delimiter=',', filling_values = 'MAL_SAMPLE', usecols = (range(10)))
+    cancer_matrix = genfromtxt('breast-cancer.txt', dtype='unicode', delimiter=',', filling_values = 'MAL_SAMPLE', usecols = (range(10)))
 
     # shuffle matrix 
     np.random.shuffle(cancer_matrix)
@@ -171,19 +174,39 @@ def breastCancer_builder():
     # load iono-y form iono_matrix and encode it
     cancer_y = encode_X(cancer_matrix[0:len(cancer_matrix)-1,9].copy())
 
-    #Integer Encode of each column
-    for i in range(len(cancer_X[0])):
-            if not re.match("^[0-9 ]+$", cancer_X[0][i]):
-                data = cancer_X[:, i-1]
-                #
-                cancer_X[:, i] = encode_X(data).astype(int)
-            else:
-                cancer_X[:, i] = cancer_X[:, i].astype(float)   
-    print(cancer_X)
-    #ONE HOT ENCODING of y 
-    cancer_y = encode_y(cancer_y)
 
-    return cancer_X, cancer_y
+    numRow, numCol = cancer_X.shape
+    for i in range(numRow):
+        for j in range(numCol):
+            element = cancer_X[i][j]
+            if not re.match("^[0-9 ]+$", element):
+                cancer_X[i][j] = stoi(element)
+            else:
+                cancer_X[i][j] = int(element)
+
+    helper_X = []
+    for i in range(numRow):
+        tmp = []
+        for j in range(numCol):
+            tmp.append(int(cancer_X[i][j]))
+        helper_X.append(tmp)
+
+    helper_X = np.asarray(helper_X)
+    cancer_y = np.asarray(cancer_y)
+    for i in range(len(cancer_y)):
+        cancer_y[i] = 1-cancer_y[i]
+    # print(helper_X)
+    # print(cancer_y)
+
+    return helper_X, cancer_y
+
+
+### Helper function to assign a value to string
+def stoi(str):
+    result = 0
+    for i in range(len(str)):
+        result = result + ord(str[i])
+    return result
 
 #=========================== Test funtions ================================
 #Test funtions: The underlining functions shall be used in the main function 
