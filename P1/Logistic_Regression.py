@@ -160,7 +160,7 @@ class Logistic_Regression:
 		## Thresholding the result
 		Yresult = self.thresholding(yht);
 
-		accuracy = self.evaluate_acc(yht, self.Ytest)
+		accuracy = self.evaluate_acc(Yresult, self.Ytest)
 
 		### Uncomment to see results
 		# print (Yresult)
