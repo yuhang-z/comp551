@@ -1,4 +1,4 @@
-### Author: Diyang Zhang & Yuhang Zhang & Olivia Xu
+# Author: Yuhang Zhang & Olivia Xu & Diyang Zhang
 
 import numpy as np
 import math
@@ -7,6 +7,10 @@ from dataProcess import ionosphere_builder
 from dataProcess import adult_builder
 from dataProcess import breastCancer_builder
 from dataProcess import bank_builder
+np.seterr(divide='ignore',invalid='ignore')
+
+# from sklearn.datasets import load_iris
+# from sklearn.linear_model import LogisticRegression
 
 
 class Logistic_Regression:
@@ -30,7 +34,7 @@ class Logistic_Regression:
 	# Learning Rate
 	lrate = 0.01
 	# Iteration Number
-	inum = 100
+	inum = 500
 	# Epsilon
 	eps = 1e-2
 
@@ -44,8 +48,11 @@ class Logistic_Regression:
 	Ytest = []
 	Yhattest = []
 
+	# Label for Analytical or GD method
+	label = ''
 
-	def __init__(self, dataname):
+
+	def __init__(self, dataname, label):
 		
 		self.dataname = dataname
 		# Load the datasets into NumPy objects
@@ -58,6 +65,7 @@ class Logistic_Regression:
 			self.Xdata,self.Ytarget = breastCancer_builder()
 		if dataname == "bank":
 			self.Xdata,self.Ytarget = bank_builder()
+		self.label = label; 
 		# Add Bias (concatenate a 1 to x)
 		self.Xdata = np.insert(self.Xdata, 0, 1, axis=1)
 		# Dataset Distribution
@@ -70,50 +78,89 @@ class Logistic_Regression:
 		self.sizeTest = numRow-self.sizeTrain-self.sizeValidation
 		self.Xtest = self.Xdata[numRow-self.sizeTest:, :]
 		self.Ytest = self.Ytarget[numRow-self.sizeTest:]
-	
-
-	def selectTrainSets(self):
-		return self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]	
 
 
 	def fit(self, X, Y, learningRate, iterNum, epsilon):
 
-		### Analytical Method
-		# Direct Solution: w*=((X.T)(X))^(-1)(X.T)(Y)
-		# Compute X.T dot X
-		product1 = np.dot(X.T, X)
-		# Compute X.T dot Y
-		product2 = np.dot(X.T, Y)
-		# Compute w*
-		try:
-			wstar = inv(product1).dot(product2)
-		except np.linalg.LinAlgError as err:
-			for i in range(len(product1)):
-				product1[i][i] += 0.000001
-			wstar = inv(product1).dot(product2)
-		### Gradient-Descent Method
-		### Uncomment the following lines for use
-		# Call gradientDescent method 
-		# wstar = self.gradientDescent(X, Y, learningRate, iterNum, epsilon)
+		
+
+		### FULL Batch Gradient Descent
+		if self.label == 'G':
+			wstar = self.gradientDescent(X, Y, learningRate, iterNum, epsilon)
 
 		return wstar;
+
+	def fit_extra(self, X, Y):
+
+		#==========================EXTRA FEATURE=========================#
+		#========================Analytical Method=======================#
+		
+		if self.label == 'A':
+			
+			x1, y1, x0, y0 = [], [], [], []
+			for i in range(len(Y)):
+				if Y[i]==1:
+					x1.append(X[i, :])
+					y1.append(1)
+				else:
+					x0.append(X[i, :])
+					y0.append(0)
+			x1 = np.asarray(x1)
+			y1 = np.asarray(y1)
+			x0 = np.asarray(x0)
+			y0 = np.asarray(y0)
+
+			# Compute X1.T dot X1
+			x1x1 = np.dot(x1.T, x1)
+			# Compute X1.T dot Y1
+			x1y1 = np.dot(x1.T, y1)
+			# Compute w1*
+			w1_star = np.linalg.pinv(x1x1).dot(x1y1)
+
+			# Compute X0.T dot X0
+			x0x0 = np.dot(x0.T, x0)
+			# Compute X0.T dot Y0
+			x0y0 = np.dot(x0.T, y0)
+			# Compute w1*
+			w0_star = np.linalg.pinv(x0x0).dot(x0y0)
+
+			return w0_star, w1_star
 
 
 	def predict(self):
 
 		### Do prediction on TEST sets
 		# Yhat = sigma((wstar.T)(X))
+		if self.label == 'A':
+			Xfortrain, Yfortrain = self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]
+			w0, w1 = self.fit_extra(Xfortrain, Yfortrain)
+			designMatrix0 = np.dot(self.Xtest, w0)
+			designMatrix1 = np.dot(self.Xtest, w1)
+			yht = []
+			for index in range(len(designMatrix0)):
+				w0x = designMatrix0[index]
+				w1x = designMatrix1[index]
+				### Tresholding
+				# print(abs(1-w1x), abs(100-w0x))
+				if (abs(1-w1x)>abs(w0x)):
+					yht.append(0)
+				else:
+					yht.append(1)
 
-		Xfortrain, Yfortrain = self.selectTrainSets()
-		wstar = self.fit(Xfortrain, Yfortrain, self.lrate, self.inum, self.eps)
-		designMatrix = np.dot(self.Xtest, wstar)
 		
-		for index in range(len(designMatrix)):
-			logit = designMatrix[index]
-			self.Yhattest.append(self.logistic_function(logit))
+		elif self.label == 'G':
+			Xfortrain, Yfortrain = self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]
+			wstar = self.fit(Xfortrain, Yfortrain, self.lrate, self.inum, self.eps)
+			designMatrix = np.dot(self.Xtest, wstar)
+			yht = []
+			for index in range(len(designMatrix)):
+				yht.append(designMatrix[index])
 
-		Yresult = self.thresholding(self.Yhattest);
-		accuracy = self.evaluate_acc(Yresult, self.Ytest)
+		
+		## Thresholding the result
+		Yresult = self.thresholding(yht);
+
+		accuracy = self.evaluate_acc(yht, self.Ytest)
 
 		### Uncomment to see results
 		# print (Yresult)
@@ -124,12 +171,27 @@ class Logistic_Regression:
 
 	def predictAccuracy_kfold(self, Xtrain, Ytrain, Xvalidation, Yvalidation):
 
-		wstar = self.fit(Xtrain, Ytrain, self.lrate, self.inum, self.eps)
-		designMatrix = np.dot(Xvalidation, wstar)
-		yht = []
-		for index in range(len(designMatrix)):
-			logit = designMatrix[index]
-			yht.append(self.logistic_function(logit))
+		if self.label == 'A':
+			w0,w1 = self.fit_extra(Xtrain, Ytrain)
+			designMatrix0 = np.dot(Xvalidation, w0)
+			designMatrix1 = np.dot(Xvalidation, w1)
+			yht = []
+			for index in range(len(designMatrix0)):
+				w0x = designMatrix0[index]
+				w1x = designMatrix1[index]
+				### Tresholding
+				# print(abs(1-w1x), abs(100-w0x))
+				if (abs(1-w1x)>abs(w0x)):
+					yht.append(0)
+				else:
+					yht.append(1)
+
+		elif self.label == 'G':
+			wstar = self.fit(Xtrain, Ytrain, self.lrate, self.inum, self.eps)
+			designMatrix = np.dot(Xvalidation, wstar)
+			yht = []
+			for index in range(len(designMatrix)):
+				yht.append(designMatrix[index])
 
 		Yresult = self.thresholding(yht);
 		accuracy = self.evaluate_acc(Yresult, Yvalidation)
@@ -259,6 +321,3 @@ class Logistic_Regression:
 	def logistic_function(self, logit):
 		return 1.0 / (1.0 + math.e**(-logit))
 
-
-
-		
