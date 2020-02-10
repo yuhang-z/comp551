@@ -13,6 +13,8 @@ from collections import defaultdict
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
+
+
 #=========================== 3 Helper Functions: ==========================
 #===================== Encode X string variables into integers ============
 def encode_X(data):
@@ -78,6 +80,8 @@ def ionosphere_builder():
     # Remove feature at column 1 
     iono_X = np.delete(iono_X, 1, 1)
 
+    iono_X = np.asarray(iono_X)
+    iono_y = np.asarray(iono_y)
     return iono_X, iono_y
 
 #================== matrix bilder for adult.txt ===========================
@@ -152,8 +156,6 @@ def bank_builder():
 
     helper_X = np.asarray(helper_X)
     bank_y = np.asarray(bank_y)
-    for i in range(len(bank_y)):
-        bank_y[i] = 1-bank_y[i]
     # print(helper_X)
     # print(bank_y)
 
@@ -193,8 +195,6 @@ def breastCancer_builder():
 
     helper_X = np.asarray(helper_X)
     cancer_y = np.asarray(cancer_y)
-    for i in range(len(cancer_y)):
-        cancer_y[i] = 1-cancer_y[i]
     # print(helper_X)
     # print(cancer_y)
 
