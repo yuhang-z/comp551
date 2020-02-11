@@ -83,9 +83,12 @@ class Logistic_Regression:
 	def fit(self, X, Y, learningRate, iterNum, epsilon):
 
 		
-
 		### FULL Batch Gradient Descent
 		if self.label == 'G':
+			wstar = self.gradientDescent(X, Y, learningRate, iterNum, epsilon)
+			# wstar = self.stochastic_gradientDescent(X, Y, learningRate, iterNum, epsilon)
+
+		if self.label == 'T':
 			wstar = self.gradientDescent(X, Y, learningRate, iterNum, epsilon)
 
 		return wstar;
@@ -124,6 +127,12 @@ class Logistic_Regression:
 			# Compute w1*
 			w0_star = np.linalg.pinv(x0x0).dot(x0y0)
 
+			# designMatrix0 = np.dot(X, w0_star)
+			# designMatrix1 = np.dot(X, w1_star)
+			# for i in range(len(X)):
+			# 	print(designMatrix0[i], designMatrix1[i])
+
+
 			return w0_star, w1_star
 
 
@@ -141,7 +150,6 @@ class Logistic_Regression:
 				w0x = designMatrix0[index]
 				w1x = designMatrix1[index]
 				### Tresholding
-				# print(abs(1-w1x), abs(100-w0x))
 				if (abs(1-w1x)>abs(w0x)):
 					yht.append(0)
 				else:
@@ -149,22 +157,24 @@ class Logistic_Regression:
 
 		
 		elif self.label == 'G':
-			Xfortrain, Yfortrain = self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]
+			
+			tmp = int(self.sizeTrain/4)
+			Xfortrain, Yfortrain = self.Xdata[0:tmp*3, :], self.Ytarget[0:tmp*3]
+			# Xfortrain, Yfortrain = self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]
 			wstar = self.fit(Xfortrain, Yfortrain, self.lrate, self.inum, self.eps)
 			designMatrix = np.dot(self.Xtest, wstar)
 			yht = []
 			for index in range(len(designMatrix)):
 				yht.append(designMatrix[index])
-
 		
-		## Thresholding the result
+		# Thresholding the result
 		Yresult = self.thresholding(yht);
 
 		accuracy = self.evaluate_acc(Yresult, self.Ytest)
 
-		### Uncomment to see results
-		# print (Yresult)
-		# print (self.Ytest)
+		# ### Uncomment to see results
+		# # print (Yresult)
+		# # print (self.Ytest)
 		print(accuracy)
 		return accuracy
 
@@ -210,6 +220,7 @@ class Logistic_Regression:
 		#print(Y_excludeTest)
 
 		t_accuracy = 0;
+		t_trainAccuracy = 0;
 		for index in range(k):
 			startIndex = size_kfoldValidation*index
 			endIndex = startIndex + size_kfoldValidation - 1
@@ -229,10 +240,21 @@ class Logistic_Regression:
 				Xtrain = np.row_stack(( X_excludeTest[0:startIndex, :], X_excludeTest[endIndex+1:, :]))
 				Ytrain = np.concatenate(( Y_excludeTest[0:startIndex], Y_excludeTest[endIndex+1:]))
 
-			t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xvalidation, Yvalidation)
+			
+			# t_trainAccuracy = t_trainAccuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xtrain, Ytrain)
+			# t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xvalidation, Yvalidation)
 
-		print(t_accuracy/k)
-		return t_accuracy/k
+			# t_trainAccuracy = t_trainAccuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xtrain, Ytrain)
+			t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain[0:int(len(Xtrain)/4*4), :], Ytrain[0:int(len(Xtrain)/4*4)], Xvalidation, Yvalidation)
+
+
+
+		# print("Train Acc", t_trainAccuracy/k)	
+
+		print("Validation Acc:", t_accuracy/k)
+		
+		# return t_accuracy/k
+		# return(t_trainAccuracy/k)
 
 
 
@@ -249,6 +271,8 @@ class Logistic_Regression:
 			g = self.gradient(X, Y, w)
 			w = w - learningRate*g
 			count = count + 1
+
+		# print(count)
 
 		return w
 
