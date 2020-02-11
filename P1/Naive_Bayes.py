@@ -169,7 +169,10 @@ class Naive_Bayes:
     # Predict
     def predict(self):
         
-        Xtrain, Ytrain = self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]
+        tmpSize = int(self.sizeTrain/4)
+
+        # Xtrain, Ytrain = self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]
+        Xtrain, Ytrain = self.Xdata[0:tmpSize*1, :], self.Ytarget[0:tmpSize*1]
         yresult = []
         for i in range(self.sizeTest):
             p_0, p_1 = self.fit(self.Xtest[i], Xtrain, Ytrain)
@@ -227,6 +230,7 @@ class Naive_Bayes:
         #print(Y_excludeTest)
 
         t_accuracy = 0;
+        t_trainAccuracy = 0;
         for index in range(k):
             startIndex = size_kfoldValidation*index
             endIndex = startIndex + size_kfoldValidation - 1
@@ -246,7 +250,12 @@ class Naive_Bayes:
                 Xtrain = np.row_stack(( X_excludeTest[0:startIndex, :], X_excludeTest[endIndex+1:, :]))
                 Ytrain = np.concatenate(( Y_excludeTest[0:startIndex], Y_excludeTest[endIndex+1:]))
 
-            t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xvalidation, Yvalidation)
+            # t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xvalidation, Yvalidation)
+            t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain[0:int(len(Xtrain)/4*2),:], Ytrain[0:int(len(Ytrain)/4*2)], Xvalidation, Yvalidation)
+
+            t_trainAccuracy = t_trainAccuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xtrain, Ytrain)
 
         print(t_accuracy/k)
+        # print(t_trainAccuracy/k)
         return t_accuracy/k
+        # return(t_trainAccuracy/k)
