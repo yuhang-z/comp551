@@ -1,4 +1,6 @@
-# Author: Yuhang Zhang & Olivia Xu & Diyang Zhang
+### Author: Yuhang Zhang
+###         Olivia Xu
+###         Diyang Zhang
 # Naive Bayes Classifier is feasible here since we have filtered data samples in the way that features are mutually independent
 # Assumptions:  1. matrix_X, and matrix_y
 #               2. For matrix_X:
