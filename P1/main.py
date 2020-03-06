@@ -31,12 +31,12 @@ lg7 = Logistic_Regression("breast-cancer", 'G')
 lg8 = Logistic_Regression("bank", 'G')
 
 ### Run .predict() for a single time test
-lg5.predict()
-lg6.predict()
-lg7.predict()
-lg8.predict()
+# lg5.predict()
+# lg6.predict()
+# lg7.predict()
+# lg8.predict()
 
-### Run .kfoldCrossValidation() for k-fold CV accuracy score
+## Run .kfoldCrossValidation() for k-fold CV accuracy score
 lg5.kfoldCrossValidation(5)
 lg6.kfoldCrossValidation(5)
 lg7.kfoldCrossValidation(5)

@@ -158,7 +158,7 @@ class Logistic_Regression:
 
 		
 		## Thresholding the result
-		Yresult = self.thresholding(yht);
+		Yresult = self.thresholding(yht)
 
 		accuracy = self.evaluate_acc(Yresult, self.Ytest)
 
@@ -193,7 +193,7 @@ class Logistic_Regression:
 			for index in range(len(designMatrix)):
 				yht.append(designMatrix[index])
 
-		Yresult = self.thresholding(yht);
+		Yresult = self.thresholding(yht)
 		accuracy = self.evaluate_acc(Yresult, Yvalidation)
 		return accuracy
 
@@ -209,7 +209,7 @@ class Logistic_Regression:
 		#print(Y_excludeTest.shape)
 		#print(Y_excludeTest)
 
-		t_accuracy = 0;
+		t_accuracy = 0
 		for index in range(k):
 			startIndex = size_kfoldValidation*index
 			endIndex = startIndex + size_kfoldValidation - 1
@@ -281,19 +281,19 @@ class Logistic_Regression:
 		return grad
 
 
-	def truthTable(Yhat, Y):
+	# def truthTable(Yhat, Y):
 		
-		### Helper Method to Evaluate Accuracy
-		### EXTRA FEATURE: Positive & Negative
-		for index in range(len(Yhat)):
-			if (Yhat[index]>=0.5) and (Y[index]==1):
-				self.tp = self.tp + 1;
-			if (Yhat[index]<0.5) and (Y[index]==0):
-				self.tn = self.tn + 1;
-			if (Yhat[index]>=0.5) and (Y[index]==0):
-				self.fp = self.fp + 1;
-			if (Yhat[index]<0.5) and (Y[index]==1):
-				self.fn = self.fn + 1;
+	# 	### Helper Method to Evaluate Accuracy
+	# 	### EXTRA FEATURE: Positive & Negative
+	# 	for index in range(len(Yhat)):
+	# 		if (Yhat[index]>=0.5) and (Y[index]==1):
+	# 			self.tp = self.tp + 1
+	# 		if (Yhat[index]<0.5) and (Y[index]==0):
+	# 			self.tn = self.tn + 1
+	# 		if (Yhat[index]>=0.5) and (Y[index]==0):
+	# 			self.fp = self.fp + 1
+	# 		if (Yhat[index]<0.5) and (Y[index]==1):
+	# 			self.fn = self.fn + 1
 
 
 	def evaluate_acc(self, Yresult, Y):
