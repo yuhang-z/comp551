@@ -1,4 +1,6 @@
-# Author: Yuhang Zhang & Olivia Xu & Diyang Zhang
+### Author: Yuhang Zhang
+###         Olivia Xu
+###	    Diyang Zhang
 
 import numpy as np
 import math
@@ -83,9 +85,12 @@ class Logistic_Regression:
 	def fit(self, X, Y, learningRate, iterNum, epsilon):
 
 		
-
 		### FULL Batch Gradient Descent
 		if self.label == 'G':
+			wstar = self.gradientDescent(X, Y, learningRate, iterNum, epsilon)
+			# wstar = self.stochastic_gradientDescent(X, Y, learningRate, iterNum, epsilon)
+
+		if self.label == 'T':
 			wstar = self.gradientDescent(X, Y, learningRate, iterNum, epsilon)
 
 		return wstar;
@@ -124,7 +129,11 @@ class Logistic_Regression:
 			# Compute w1*
 			w0_star = np.linalg.pinv(x0x0).dot(x0y0)
 
-			return w0_star, w1_star
+			# designMatrix0 = np.dot(X, w0_star)
+			# designMatrix1 = np.dot(X, w1_star)
+			# for i in range(len(X)):
+			# 	print(designMatrix0[i], designMatrix1[i])
+			return np.subtract(w1_star, w0_star)
 
 
 	def predict(self):
@@ -132,37 +141,39 @@ class Logistic_Regression:
 		### Do prediction on TEST sets
 		# Yhat = sigma((wstar.T)(X))
 		if self.label == 'A':
-			Xfortrain, Yfortrain = self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]
-			w0, w1 = self.fit_extra(Xfortrain, Yfortrain)
-			designMatrix0 = np.dot(self.Xtest, w0)
-			designMatrix1 = np.dot(self.Xtest, w1)
+			Xfortrain, Yfortrain = self.Xdata[0:int(self.sizeTrain/4), :], self.Ytarget[0:int(self.sizeTrain/4)]
+			wstar = self.fit_extra(Xfortrain, Yfortrain)
+			designMatrix = np.dot(self.Xtest, wstar)
 			yht = []
-			for index in range(len(designMatrix0)):
-				w0x = designMatrix0[index]
-				w1x = designMatrix1[index]
-				### Tresholding
-				# print(abs(1-w1x), abs(100-w0x))
-				if (abs(1-w1x)>abs(w0x)):
-					yht.append(0)
-				else:
-					yht.append(1)
+			for index in range(len(designMatrix)):
+				logit = designMatrix[index]
+				yht.append(self.logistic_function(logit))
+			# print(yht)
 
 		
 		elif self.label == 'G':
-			Xfortrain, Yfortrain = self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]
+			
+			tmp = int(self.sizeTrain/4)
+			Xfortrain, Yfortrain = self.Xdata[0:tmp*3, :], self.Ytarget[0:tmp*3]
+			# Xfortrain, Yfortrain = self.Xdata[0:self.sizeTrain, :], self.Ytarget[0:self.sizeTrain]
 			wstar = self.fit(Xfortrain, Yfortrain, self.lrate, self.inum, self.eps)
 			designMatrix = np.dot(self.Xtest, wstar)
 			yht = []
 			for index in range(len(designMatrix)):
 				yht.append(designMatrix[index])
-
 		
+<<<<<<< HEAD
 		## Thresholding the result
 		Yresult = self.thresholding(yht)
+=======
+		# Thresholding the result
+		# Yresult = self.thresholding_extra(yht);
+		Yresult = self.thresholding(yht);
+>>>>>>> ab8cd4bafe0a87504adf367c15e7e3e148088641
 
 		accuracy = self.evaluate_acc(Yresult, self.Ytest)
 
-		### Uncomment to see results
+		# ### Uncomment to see results
 		# print (Yresult)
 		# print (self.Ytest)
 		print(accuracy)
@@ -172,19 +183,13 @@ class Logistic_Regression:
 	def predictAccuracy_kfold(self, Xtrain, Ytrain, Xvalidation, Yvalidation):
 
 		if self.label == 'A':
-			w0,w1 = self.fit_extra(Xtrain, Ytrain)
-			designMatrix0 = np.dot(Xvalidation, w0)
-			designMatrix1 = np.dot(Xvalidation, w1)
+			wstar = self.fit_extra(Xtrain, Ytrain)
+			designMatrix = np.dot(Xvalidation, wstar)
 			yht = []
-			for index in range(len(designMatrix0)):
-				w0x = designMatrix0[index]
-				w1x = designMatrix1[index]
-				### Tresholding
-				# print(abs(1-w1x), abs(100-w0x))
-				if (abs(1-w1x)>abs(w0x)):
-					yht.append(0)
-				else:
-					yht.append(1)
+			for index in range(len(designMatrix)):
+				logit = designMatrix[index]
+				yht.append(self.logistic_function(logit))
+			# print(yht)
 
 		elif self.label == 'G':
 			wstar = self.fit(Xtrain, Ytrain, self.lrate, self.inum, self.eps)
@@ -193,8 +198,18 @@ class Logistic_Regression:
 			for index in range(len(designMatrix)):
 				yht.append(designMatrix[index])
 
+<<<<<<< HEAD
 		Yresult = self.thresholding(yht)
+=======
+		# Yresult = self.thresholding(yht);
+		Yresult = self.thresholding_extra(yht);
+		# print(yht)
+		# print(Yresult)
+>>>>>>> ab8cd4bafe0a87504adf367c15e7e3e148088641
 		accuracy = self.evaluate_acc(Yresult, Yvalidation)
+		# print(Yresult)
+		# print(Yvalidation)
+		# print()
 		return accuracy
 
 
@@ -209,7 +224,12 @@ class Logistic_Regression:
 		#print(Y_excludeTest.shape)
 		#print(Y_excludeTest)
 
+<<<<<<< HEAD
 		t_accuracy = 0
+=======
+		t_accuracy = 0;
+		t_trainAccuracy = 0;
+>>>>>>> ab8cd4bafe0a87504adf367c15e7e3e148088641
 		for index in range(k):
 			startIndex = size_kfoldValidation*index
 			endIndex = startIndex + size_kfoldValidation - 1
@@ -229,10 +249,21 @@ class Logistic_Regression:
 				Xtrain = np.row_stack(( X_excludeTest[0:startIndex, :], X_excludeTest[endIndex+1:, :]))
 				Ytrain = np.concatenate(( Y_excludeTest[0:startIndex], Y_excludeTest[endIndex+1:]))
 
-			t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xvalidation, Yvalidation)
+			
+			# t_trainAccuracy = t_trainAccuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xtrain, Ytrain)
+			# t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xvalidation, Yvalidation)
 
-		print(t_accuracy/k)
-		return t_accuracy/k
+			# t_trainAccuracy = t_trainAccuracy + self.predictAccuracy_kfold(Xtrain, Ytrain, Xtrain, Ytrain)
+			t_accuracy = t_accuracy + self.predictAccuracy_kfold(Xtrain[0:int(len(Xtrain)/4*2), :], Ytrain[0:int(len(Xtrain)/4*2)], Xvalidation, Yvalidation)
+
+
+
+		# print("Train Acc", t_trainAccuracy/k)	
+
+		print("Validation Acc:", t_accuracy/k)
+		
+		# return t_accuracy/k
+		# return(t_trainAccuracy/k)
 
 
 
@@ -249,6 +280,8 @@ class Logistic_Regression:
 			g = self.gradient(X, Y, w)
 			w = w - learningRate*g
 			count = count + 1
+
+		# print(count)
 
 		return w
 
@@ -312,6 +345,19 @@ class Logistic_Regression:
 		Yresult = []
 		for singley in yh:
 			if (singley>=0.5):
+			# if (singley>=0.7):
+				Yresult.append(1)
+			else:
+				Yresult.append(0)
+
+		return Yresult
+
+	def thresholding_extra(self, yh):
+
+		Yresult = []
+		for singley in yh:
+			if (singley>=0.7):
+			# if (singley>=0.7):
 				Yresult.append(1)
 			else:
 				Yresult.append(0)

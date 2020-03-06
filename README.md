@@ -1,2 +1,2 @@
 # comp551
-machine learning mini-projects 
+3 machine learning projects 
