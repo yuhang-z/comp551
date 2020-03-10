@@ -1,10 +1,9 @@
 # Author: Yuhang (10, Mar)
 # compile environment: python3.8
 
-
 # Libraries: 
 
-from dataLoading import twenty_train_data, twenty_train_target, twenty_test_data, twenty_test_target, IMDb_train_data, IMDb_train_target, IMDb_test_data, IMDb_test_target
+from dataLoading import *
 
 import numpy as np
 from pprint import pprint
@@ -18,3 +17,46 @@ from sklearn.metrics import accuracy_score
 
 from sklearn.model_selection import cross_val_score
 from sklearn.tree import DecisionTreeClassifier
+
+
+# Specify pipeline
+DTpip = Pipeline([
+('vect', CountVectorizer()),
+('tfidf', TfidfTransformer()),
+('clf', DecisionTreeClassifier(random_state=0)),
+])
+
+
+
+# k-fold validation before tuning 
+
+
+kfold = KFold(n_splits=5, shuffle=False)
+
+results = cross_val_score(DTpip, twenty_train.data, twenty_train.target, cv=kfold)
+
+print("Accuracy before tuning:", results.mean())
+
+
+
+# k-fold validation after tuning using random search
+params = {
+    "clf__max_features": ['auto', 'sqrt', 'log2'],
+    "clf__criterion": ["gini", "entropy"],
+    "clf__min_samples_split": [12, 14, 16, 18, 20],
+    "clf__min_samples_leaf": [12, 14, 16, 18, 20],
+    "clf__class_weight": ["balanced", None]
+    }
+
+turned_dt_random = RandomizedSearchCV(DTpip, param_distributions=params, cv=5)
+
+turned_dt_random.fit(twenty_train.data, twenty_train.target)
+best_estimator = turned_dt_random.best_estimator_
+
+print('Best max_depth(random search):', turned_dt_random.best_estimator_.get_params()['clf__max_depth'])
+print('Best max_features(random search):', turned_dt_random.best_estimator_.get_params()['clf__max_features'])
+print('Best criterion(random search):', turned_dt_random.best_estimator_.get_params()['clf__criterion'])
+
+y_estimated = turned_dt_random.predict(twenty_test.data)
+acc = np.mean(y_estimated == twenty_test.target)
+print("Accuracy after tuning:{}".format(acc))
