@@ -10,6 +10,7 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.model_selection import KFold, cross_val_score, GridSearchCV, RandomizedSearchCV
+from sklearn.metrics import accuracy_score
 
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
@@ -38,17 +39,20 @@ from sklearn.ensemble import RandomForestClassifier
 #    print(twenty_train.target_names[t])
 
 
+# Import both train and test datasets:
 
-# Import 20 groups dataset
+# Import 20 groups train dataset
 twenty_train = fetch_20newsgroups(subset='train', remove=(['headers','footers', 'quotes']), shuffle=True)
 
+# Import 20 groups test dataset
+twenty_test = fetch_20newsgroups(subset='test', remove=(['headers','footers', 'quotes']), shuffle=True)
 
-# Import IMDB reviews dataset
-IMDb_train = datasets.load_files("/Users/YuhangZhang/desktop/gh/comp551/P2/IMDB_dataset", description=None, categories=None, load_content=True, shuffle=True, encoding='utf-8', decode_error='strict', random_state=0)
 
-# check if data is successfully loaded:
-# "target_names": class names 
-#print(IMDb_train.target_names)
+# Import IMDB train dataset
+IMDb_train = datasets.load_files("/Users/YuhangZhang/desktop/gh/comp551/P2/IMDB_train", description=None, categories=None, load_content=True, shuffle=True, encoding='utf-8', decode_error='strict', random_state=0)
+
+# Import IMDB test dataset
+IMDb_test = datasets.load_files("/Users/YuhangZhang/desktop/gh/comp551/P2/IMDB_test", description=None, categories=None, load_content=True, shuffle=True, encoding='utf-8', decode_error='strict', random_state=0)
 
 
 
@@ -123,58 +127,28 @@ def randomF(trainData, trainTarget, testData, testTarget):
     print(np.mean(predicted == testTarget))
 
 
-# Test of 20 groups
-twenty_test = fetch_20newsgroups(subset='test', remove=(['headers','footers', 'quotes']), shuffle=True)
 
-# Logistic regression (0.6736)
-#logisticR(twenty_train.data, twenty_train.target, twenty_test.data, twenty_test.target)
-
-# Decision tree (0.4048)
-#decisionT(twenty_train.data, twenty_train.target, twenty_test.data, twenty_test.target)
-
-# SVC (0.6919)
-#SVC(twenty_train.data, twenty_train.target, twenty_test.data, twenty_test.target)
-
-# AdaBoost (0.3747)
-#adaB(twenty_train.data, twenty_train.target, twenty_test.data, twenty_test.target)
-
-# random forest (0.5754)
-#randomF(twenty_train.data, twenty_train.target, twenty_test.data, twenty_test.target)
+# K-fold cross validation 
 
 
-# Test of IMDb
-IMDb_test = datasets.load_files("/Users/YuhangZhang/desktop/gh/comp551/P2/IMDB_dataset", description=None, categories=None, load_content=True, shuffle=True, encoding='utf-8', decode_error='strict', random_state=0)
-
-# Logistic regression (0.93328)
-#logisticR(IMDb_train.data, IMDb_train.target, IMDb_test.data, IMDb_test.target)
-
-# Decision tree (1.0)
-#decisionT(IMDb_train.data, IMDb_train.target, IMDb_test.data, IMDb_test.target)
-
-# SVC (0.98996)
-#SVC(IMDb_train.data, IMDb_train.target, IMDb_test.data, IMDb_test.target)
-
-# AdaBoost (0.80996)
-#adaB(IMDb_train.data, IMDb_train.target, IMDb_test.data, IMDb_test.target)
-
-# random forest (0.97652)
-#randomF(IMDb_train.data, IMDb_train.target, IMDb_test.data, IMDb_test.target)
 
 
-# "Validation" using k-fold cross validation
+def logisticR_validation(trainData, trainTarget, testData, testTarget):
 
-def logisticR_validation(trainData, trainTarget):
-    count_vect = CountVectorizer()
-    X_train_counts = count_vect.fit_transform(trainData)
-    tfidf_transformer = TfidfTransformer()
-    X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
+    #kfold = KFold(n_splits=5, shuffle=True)
 
-    kfold = KFold(n_splits=5, shuffle=False)
-    #Logistic Regression supports only penalties in ['l1', 'l2', 'elasticnet', 'none']
-    model = LogisticRegression()
-    results = cross_val_score(model, X_train_tfidf, trainTarget, cv=kfold)
-    print(results)
-    print("Accuracy:", results.mean())
+    LRpip = Pipeline([
+    ('vect', CountVectorizer()),
+    ('tfidf', TfidfTransformer()),
+    ('clf', LogisticRegression()),
+    ('kflod', KFold(n_splits=5, shuffle=False)),
+    ])
+
+    LRpip.fit(trainData, trainTarget)
+
+    prediction = LRpip.predict(testData)
+
+    print( "Accuracy:", np.mean(prediction == testTarget))
 
 
 def decisionT_validation(trainData, trainTarget):
@@ -234,43 +208,43 @@ def randomF_validation(trainData, trainTarget):
 
 
 # Data set 1, 20 groups =========================
-# Logistic regression (Accuracy: 0.7193744913463932)
-#logisticR_validation(twenty_train.data, twenty_train.target)
+# Logistic regression (Accuracy: 0.6945019744071711)--ok
+logisticR_validation(twenty_train.data, twenty_train.target, twenty_test.data, twenty_test.target)
 
 # Decision tree (Accuracy: 0.4395444260941693)
-#decisionT_validation(twenty_train.data, twenty_train.target)
+#decisionT_validation(twenty_test.data, twenty_test.target)
 
 # SVC (Accuracy: 0.7596785719448648)
-#SVC_validation(twenty_train.data, twenty_train.target)
+#SVC_validation(twenty_test.data, twenty_test.target)
 
 # AdaBoost (Accuracy: 0.39764879448850987)
-#adaB_validation(twenty_train.data, twenty_train.target)
+#adaB_validation(twenty_test.data, twenty_test.target)
 
 # random forest (Accuracy: 0.6119837324615846)
-#randomF_validation(twenty_train.data, twenty_train.target)
+#randomF_validation(twenty_test.data, twenty_test.target)
 
 
 # Data set 2, IMDb =========================
 # Logistic regression (Accuracy: 0.8878)
-#logisticR_validation(IMDb_train.data, IMDb_train.target)
+#logisticR_validation(IMDb_test.data, IMDb_test.target)
 
 # Decision tree (Accuracy: 0.7052000000000002)
-#decisionT_validation(IMDb_train.data, IMDb_train.target)
+#decisionT_validation(IMDb_test.data, IMDb_test.target)
 
 # SVC (Accuracy: 0.8925599999999999)
-#SVC_validation(IMDb_train.data, IMDb_train.target)
+#SVC_validation(IMDb_test.data, IMDb_test.target)
 
 # AdaBoost (Accuracy: 0.80472)
-#adaB_validation(IMDb_train.data, IMDb_train.target)
+#adaB_validation(IMDb_test.data, IMDb_test.target)
 
 # random forest (Accuracy: 0.8301999999999999)
-#randomF_validation(IMDb_train.data, IMDb_train.target)
+#randomF_validation(IMDb_test.data, IMDb_test.target)
 
 
 
 #TODO: auto hyperparameter generator is not yet successful
 # Turing hyperparameter using "random Search"
-def turningLogR(trainData, trainTarget):
+def turningLR(trainData, trainTarget):
     penalty = ['l1', 'l2']
     C = np.linspace(1,200)
 
