@@ -3,7 +3,7 @@
 
 # Libraries: 
 
-from dataLoading import twenty_train_data, twenty_train_target, twenty_test_data, twenty_test_target, IMDb_train_data, IMDb_train_target, IMDb_test_data, IMDb_test_target
+from dataLoading import *
 
 import numpy as np
 from pprint import pprint
@@ -36,13 +36,13 @@ kf = KFold(n_splits=5, shuffle=True)
 curr_fold = 0
 acc_list = []
 
-for train_idx, test_idx in kf.split(twenty_train_data):
+for train_idx, test_idx in kf.split(twenty_train.data):
 
-    LRpip.fit(twenty_train_data, twenty_train_target)
+    LRpip.fit(twenty_train.data, twenty_train.target)
 
-    predicted = LRpip.predict(twenty_test_data)
+    predicted = LRpip.predict(twenty_test.data)
 
-    acc = accuracy_score(twenty_test_target, predicted)
+    acc = accuracy_score(twenty_test.target, predicted)
     
     acc_list.append(acc)
 
