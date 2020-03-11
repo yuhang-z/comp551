@@ -29,13 +29,23 @@ adapip = Pipeline([
 
 
 # k-fold validation before tuning 
+kf = KFold(n_splits=5, shuffle=True)
+curr_fold = 0
+acc_list = []
 
+for train_idx, test_idx in kf.split(twenty_train.data):
 
-kfold = KFold(n_splits=5, shuffle=False)
+    adapip.fit(twenty_train.data, twenty_train.target)
 
-results = cross_val_score(adapip, twenty_train.data, twenty_train.target, cv=kfold)
+    predicted = adapip.predict(twenty_test.data)
 
-print("Accuracy before tuning:", results.mean())
+    acc = accuracy_score(twenty_test.target, predicted)
+    
+    acc_list.append(acc)
+
+    curr_fold += 1
+
+print("Accuracy before tuning:", np.average(acc_list))
 
 
 

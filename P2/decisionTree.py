@@ -23,28 +23,40 @@ from sklearn.tree import DecisionTreeClassifier
 DTpip = Pipeline([
 ('vect', CountVectorizer()),
 ('tfidf', TfidfTransformer()),
-('clf', DecisionTreeClassifier(random_state=0)),
+('clf', DecisionTreeClassifier()),
 ])
 
 
 
 # k-fold validation before tuning 
 
+kf = KFold(n_splits=5, shuffle=True)
+curr_fold = 0
+acc_list = []
 
-kfold = KFold(n_splits=5, shuffle=False)
+for train_idx, test_idx in kf.split(twenty_train.data):
 
-results = cross_val_score(DTpip, twenty_train.data, twenty_train.target, cv=kfold)
+    DTpip.fit(twenty_train.data, twenty_train.target)
 
-print("Accuracy before tuning:", results.mean())
+    predicted = DTpip.predict(twenty_test.data)
+
+    acc = accuracy_score(twenty_test.target, predicted)
+    
+    acc_list.append(acc)
+
+    curr_fold += 1
+
+print("Accuracy before tuning:", np.average(acc_list))
 
 
 
 # k-fold validation after tuning using random search
 params = {
-    "clf__max_features": ['auto', 'sqrt', 'log2'],
+    "clf__max_depth": [400],
+    "clf__max_features": [None, 'auto', 'log2'],
     "clf__criterion": ["gini", "entropy"],
-    "clf__min_samples_split": [2, 12, 14, 16, 18, 20],
-    "clf__min_samples_leaf": [1, 12, 14, 16, 18, 20],
+    "clf__min_samples_split": [14, 15, 16, 17, 18, 19, 20, 21, 22],
+    "clf__min_samples_leaf": [12, 14, 16, 17, 18, 19, 20, 22, 24],
     "clf__class_weight": ["balanced", None]
     }
 

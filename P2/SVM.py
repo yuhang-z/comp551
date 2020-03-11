@@ -23,40 +23,48 @@ from sklearn.svm import LinearSVC
 SVMpip = Pipeline([
 ('vect', CountVectorizer()),
 ('tfidf', TfidfTransformer()),
-('clf', LinearSVC(random_state=0)),
+('clf', LinearSVC(random_state=0, tol=1e-5)),
 ])
 
 
 
 # k-fold validation before tuning 
+# kf = KFold(n_splits=5, shuffle=True)
+# curr_fold = 0
+# acc_list = []
 
+# for train_idx, test_idx in kf.split(twenty_train.data):
 
-kfold = KFold(n_splits=5, shuffle=False)
+#     SVMpip.fit(twenty_train.data, twenty_train.target)
 
-results = cross_val_score(SVMpip, twenty_train.data, twenty_train.target, cv=kfold)
+#     predicted = SVMpip.predict(twenty_test.data)
 
-print("Accuracy before tuning:", results.mean())
+#     acc = accuracy_score(twenty_test.target, predicted)
+    
+#     acc_list.append(acc)
+
+#     curr_fold += 1
+
+# print("Accuracy before tuning:", np.average(acc_list))
 
 
 
 # k-fold validation after tuning using random search
 params = {
-    "clf__C": [0.1, 1, 2, 3, 10, 100, 1000],
+    "clf__C": [1, 2, 3],
     "clf__loss": ['hinge', 'squared_hinge'],
-    "clf__tol": [1e-3, 1e-4, 1e-5, 1e-6],
     "clf__max_iter": [1000, 2000, 3000],
     "clf__fit_intercept": [True, False],
     "clf__multi_class": ['ovr', 'crammer_singer']
     }
 
-turned_svm_random = RandomizedSearchCV(SVMpip, param_distributions=params, cv=5)
+turned_svm_random = RandomizedSearchCV(SVMpip, param_distributions=params, cv=5, verbose=10, random_state=42, n_jobs=-1)
 
 turned_svm_random.fit(twenty_train.data, twenty_train.target)
 best_estimator = turned_svm_random.best_estimator_
 
 print('Best C(random search):', turned_svm_random.best_estimator_.get_params()['clf__C'])
 print('Best loss(random search):', turned_svm_random.best_estimator_.get_params()['clf__loss'])
-print('Best tol(random search):', turned_svm_random.best_estimator_.get_params()['clf__tol'])
 print('Best max_iter(random search):', turned_svm_random.best_estimator_.get_params()['clf__max_iter'])
 print('Best fit_intercept(random search):', turned_svm_random.best_estimator_.get_params()['clf__fit_intercept'])
 print('Best multi_class(random search):', turned_svm_random.best_estimator_.get_params()['clf__multi_class'])
