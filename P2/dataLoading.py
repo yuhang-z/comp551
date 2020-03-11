@@ -24,7 +24,7 @@ twenty_test = fetch_20newsgroups(subset='test', remove=(['headers','footers', 'q
 
 
 # Import IMDB train dataset
-IMDb_train = datasets.load_files("/Users/YuhangZhang/desktop/gh/comp551/P2/IMDB_train", description=None, categories=None, load_content=True, shuffle=True, encoding='utf-8', decode_error='strict', random_state=0)
+imdb_train = datasets.load_files("/Users/YuhangZhang/desktop/gh/comp551/P2/IMDB_train", description=None, categories=None, load_content=True, shuffle=True, encoding='utf-8', decode_error='strict', random_state=0)
 
 #IMDb_train_data = IMDb_train.data
 
@@ -32,7 +32,7 @@ IMDb_train = datasets.load_files("/Users/YuhangZhang/desktop/gh/comp551/P2/IMDB_
 
 
 # Import IMDB test dataset
-IMDb_test = datasets.load_files("/Users/YuhangZhang/desktop/gh/comp551/P2/IMDB_test", description=None, categories=None, load_content=True, shuffle=True, encoding='utf-8', decode_error='strict', random_state=0)
+imdb_test = datasets.load_files("/Users/YuhangZhang/desktop/gh/comp551/P2/IMDB_test", description=None, categories=None, load_content=True, shuffle=True, encoding='utf-8', decode_error='strict', random_state=0)
 
 #IMDb_test_data = IMDb_test.data
 
