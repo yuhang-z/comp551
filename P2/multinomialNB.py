@@ -7,7 +7,7 @@ from dataLoading import *
 
 import numpy as np
 from pprint import pprint
-from sklearn import datasets, linear_model
+from sklearn import datasets
 from sklearn import metrics
 from sklearn.pipeline import Pipeline
 from sklearn.datasets import fetch_20newsgroups
@@ -16,41 +16,50 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.model_selection import KFold, cross_val_score, GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import accuracy_score
 
-from sklearn.linear_model import LogisticRegression
+
 from sklearn.model_selection import cross_val_score
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import LinearSVC
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.ensemble import RandomForestClassifier
 
 
 ### Specify pipeline
-MNBpip = Pipeline([
+RFpip = Pipeline([
 ('vect', CountVectorizer()),
 ('tfidf', TfidfTransformer()),
-('clf',  MultinomialNB()),
+('clf', RandomForestClassifier(n_estimators=200, min_samples_split=16, min_samples_leaf=16)),
 ])
 
 
-print("Default Parameters: sklearn Default")
+print("Default Parameters: n_estimators=200, min_samples_split=16, min_samples_leaf=16")
 
-# ### PART I (Possible Bonus): Perform Training on training set, Predictions also on training set
-MNBpip.fit(twenty_train.data, twenty_train.target)
-pred = MNBpip.predict(twenty_train.data)
-print("(Bonus) Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
+### PART I (Possible Bonus): Perform Training on training set, Predictions also on training set
+RFpip.fit(twenty_train.data, twenty_train.target)
+pred = RFpip.predict(twenty_train.data)
+print("(Bonus) 20: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
 
-# ### PART II (Required): Perform Training on training set, Predictions on test set
-pred = MNBpip.predict(twenty_test.data)
-print("(Required) Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
+RFpip.fit(imdb_train.data, imdb_train.target)
+pred = RFpip.predict(imdb_train.data)
+print("(Bonus) imdb: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
+
+
+### PART II (Required): Perform Training on training set, Predictions on test set
+pred = RFpip.predict(twenty_test.data)
+print("(Required) 20: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
+
+pred = RFpip.predict(imdb_test.data)
+print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
 
 ### Part III (Required): K-Fold cross validation
-print("(Required) K-cv score before tuning:", cross_val_score(MNBpip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
+print("(Required) 20: K-cv score before tuning:", cross_val_score(RFpip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
+
+print("(Required) imdb: K-cv score before tuning:", cross_val_score(RFpip, imdb_train.data, imdb_train.target, cv=5, scoring='accuracy').mean())
 # kf = KFold(n_splits=5, random_state=None, shuffle=False)
 # print(twenty_train.data.shape)
 # for train_index, test_index in kf.split(twenty_train):
-#   MNBpip.fit(twenty_train.data[train_index], twenty_train.target[test_index])
-#   pred = MNBpip.predict(twenty_train.data[test_index])
+#   RFpip.fit(twenty_train.data[train_index], twenty_train.target[test_index])
+#   pred = RFpip.predict(twenty_train.data[test_index])
 #   print(metrics.f1_score(twenty_train.target[test_index], pred, average='macro'))
+
 
 ### Part IV (Bonus): A study of comparison between using different "super-class" of categories for training
 ### For 20newsgroup only, we compare the result of training using "comp.", "sci.", "rec." & "talk."
@@ -67,36 +76,41 @@ comp_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quo
 rec_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=rec)
 sci_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=sci)
 talk_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=talk)
-MNBpip.fit(comp_train.data, comp_train.target)
-pred = MNBpip.predict(comp_test.data)
+RFpip.fit(comp_train.data, comp_train.target)
+pred = RFpip.predict(comp_test.data)
 print("(Bonus) Comp. Test Set Accuracy:", metrics.f1_score(comp_test.target, pred, average='macro'))
-MNBpip.fit(rec_train.data, rec_train.target)
-pred = MNBpip.predict(rec_test.data)
+RFpip.fit(rec_train.data, rec_train.target)
+pred = RFpip.predict(rec_test.data)
 print("(Bonus) Rec. Test Set Accuracy:", metrics.f1_score(rec_test.target, pred, average='macro'))
-MNBpip.fit(sci_train.data, sci_train.target)
-pred = MNBpip.predict(sci_test.data)
+RFpip.fit(sci_train.data, sci_train.target)
+pred = RFpip.predict(sci_test.data)
 print("(Bonus) Sci. Test Set Accuracy:", metrics.f1_score(sci_test.target, pred, average='macro'))
-MNBpip.fit(talk_train.data, talk_train.target)
-pred = MNBpip.predict(talk_test.data)
+RFpip.fit(talk_train.data, talk_train.target)
+pred = RFpip.predict(talk_test.data)
 print("(Bonus) Talk. Test Set Accuracy:", metrics.f1_score(talk_test.target, pred, average='macro'))
+
 
 
 # # k-fold validation after tuning using random search
 # params = {
-#     "clf__penalty": ['l1', 'l2'],
-#     "clf__C": [1.0, 2.0, 3.0],
-#     "clf__max_iter": [1000, 2000, 3000]
+#     "clf__bootstrap": [True, False],
+#     "clf__max_features": ['auto', 'sqrt'],
+#     "clf__n_estimators": [200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000],
+#     "clf__min_samples_split": [12, 14, 16, 18, 20],
+#     "clf__min_samples_leaf": [12, 14, 16, 18, 20],
 #     }
 
-# turned_lr_random = RandomizedSearchCV(MNBpip, param_distributions=params, cv=5)
+# turned_rf_random = RandomizedSearchCV(RFpip, param_distributions=params, cv=5)
 
-# turned_lr_random.fit(twenty_train.data, twenty_train.target)
-# best_estimator = turned_lr_random.best_estimator_
+# turned_rf_random.fit(twenty_train.data, twenty_train.target)
+# best_estimator = turned_rf_random.best_estimator_
 
-# print('Best Penalty(random search):', turned_lr_random.best_estimator_.get_params()['clf__penalty'])
-# print('Best C(random search):', turned_lr_random.best_estimator_.get_params()['clf__C'])
-# print('Best iteration(random search):', turned_lr_random.best_estimator_.get_params()['clf__max_iter'])
+# print('Best bootstrap(random search):', turned_rf_random.best_estimator_.get_params()['clf__bootstrap'])
+# print('Best max_features(random search):', turned_rf_random.best_estimator_.get_params()['clf__max_features'])
+# print('Best n_estimators(random search):', turned_rf_random.best_estimator_.get_params()['clf__n_estimators'])
+# print('Best min_samples_split(random search):', turned_rf_random.best_estimator_.get_params()['clf__min_samples_split'])
+# print('Best min_samples_leaf(random search):', turned_rf_random.best_estimator_.get_params()['clf__min_samples_leaf'])
 
-# y_estimated = turned_lr_random.predict(twenty_test.data)
+# y_estimated = turned_rf_random.predict(twenty_test.data)
 # acc = np.mean(y_estimated == twenty_test.target)
 # print("Accuracy after tuning:{}".format(acc))
