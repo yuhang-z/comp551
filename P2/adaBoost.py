@@ -38,7 +38,7 @@ print("(Bonus) 20: Training Set Accuracy:", metrics.f1_score(twenty_train.target
 
 adapip.fit(imdb_train.data, imdb_train.target)
 pred = adapip.predict(imdb_train.data)
-print("(Bonus) imdb: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
+print("(Bonus) imdb: Training Set Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
 
 
 # ### PART II (Required): Perform Training on training set, Predictions on test set
@@ -46,7 +46,7 @@ pred = adapip.predict(twenty_test.data)
 print("(Required) 20: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
 pred = adapip.predict(imdb_test.data)
-print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
+print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
 
 
 ### Part III (Required): K-Fold cross validation

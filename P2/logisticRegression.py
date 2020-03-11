@@ -41,7 +41,7 @@ print("(Bonus) 20: Training Set Accuracy:", metrics.f1_score(twenty_train.target
 
 LRpip.fit(imdb_train.data, imdb_train.target)
 pred = LRpip.predict(imdb_train.data)
-print("(Bonus) imdb: Training Set Accuracy:", accuracy_score(twenty_train.target, pred))
+print("(Bonus) imdb: Training Set Accuracy:", accuracy_score(imdb_test.target, pred))
 
 
 ### PART II (Required): Perform Training on training set, Predictions on test set
@@ -49,7 +49,7 @@ pred = LRpip.predict(twenty_test.data)
 print("(Required) 20: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
 pred = LRpip.predict(imdb_test.data)
-print("(Required) imdb: Test Set Accuracy:", accuracy_score(twenty_test.target, pred))
+print("(Required) imdb: Test Set Accuracy:", accuracy_score(imdb_test.target, pred))
 
 
 ### Part III (Required): K-Fold cross validation
