@@ -34,15 +34,25 @@ print("Default Parameters: n_estimators=200, learning_rate=0.8")
 # ### PART I (Possible Bonus): Perform Training on training set, Predictions also on training set
 adapip.fit(twenty_train.data, twenty_train.target)
 pred = adapip.predict(twenty_train.data)
-print("(Bonus) Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
+print("(Bonus) 20: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
+
+adapip.fit(imdb_train.data, imdb_train.target)
+pred = adapip.predict(imdb_train.data)
+print("(Bonus) imdb: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
+
 
 # ### PART II (Required): Perform Training on training set, Predictions on test set
 pred = adapip.predict(twenty_test.data)
-print("(Required) Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
+print("(Required) 20: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
+
+pred = adapip.predict(imdb_test.data)
+print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
 
 ### Part III (Required): K-Fold cross validation
-print("(Required) K-cv score before tuning:", cross_val_score(adapip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
+print("(Required) 20: K-cv score before tuning:", cross_val_score(adapip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
+
+print("(Required) imdb: K-cv score before tuning:", cross_val_score(adapip, imdb_train.data, imdb_train.target, cv=5, scoring='accuracy').mean())
 # kf = KFold(n_splits=5, random_state=None, shuffle=False)
 # print(twenty_train.data.shape)
 # for train_index, test_index in kf.split(twenty_train):
