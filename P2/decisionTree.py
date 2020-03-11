@@ -30,24 +30,35 @@ DTpip = Pipeline([
 
 print("Default Parameters: Sklearn Defaults. The nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.")
 
-# ### PART I (Possible Bonus): Perform Training on training set, Predictions also on training set
+### PART I (Possible Bonus): Perform Training on training set, Predictions also on training set
 DTpip.fit(twenty_train.data, twenty_train.target)
-pred = DTpip.predict(twenty_train.data)
-print("(Bonus) Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
+pred = RFpip.predict(twenty_train.data)
+print("(Bonus) 20: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
 
-# ### PART II (Required): Perform Training on training set, Predictions on test set
+DTpip.fit(imdb_train.data, imdb_train.target)
+pred = DTpip.predict(imdb_train.data)
+print("(Bonus) imdb: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
+
+
+### PART II (Required): Perform Training on training set, Predictions on test set
 pred = DTpip.predict(twenty_test.data)
-print("(Required) Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
+print("(Required) 20: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
+
+pred = DTpip.predict(imdb_test.data)
+print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
 
 ### Part III (Required): K-Fold cross validation
-print("(Required) K-cv score before tuning:", cross_val_score(DTpip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
+print("(Required) 20: K-cv score before tuning:", cross_val_score(DTpip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
+
+print("(Required) imdb: K-cv score before tuning:", cross_val_score(DTpip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
 # kf = KFold(n_splits=5, random_state=None, shuffle=False)
 # print(twenty_train.data.shape)
 # for train_index, test_index in kf.split(twenty_train):
 #   DTpip.fit(twenty_train.data[train_index], twenty_train.target[test_index])
 #   pred = DTpip.predict(twenty_train.data[test_index])
 #   print(metrics.f1_score(twenty_train.target[test_index], pred, average='macro'))
+
 
 ### Part IV (Bonus): A study of comparison between using different "super-class" of categories for training
 ### For 20newsgroup only, we compare the result of training using "comp.", "sci.", "rec." & "talk."
