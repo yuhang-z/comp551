@@ -22,7 +22,13 @@ from sklearn.ensemble import AdaBoostClassifier
 
 
 ### Specify pipeline
-adapip = Pipeline([
+adapip1 = Pipeline([
+('vect', CountVectorizer()),
+('tfidf', TfidfTransformer()),
+('clf', AdaBoostClassifier(n_estimators=200, learning_rate=0.8, random_state=0)),
+])
+
+adapip2 = Pipeline([
 ('vect', CountVectorizer()),
 ('tfidf', TfidfTransformer()),
 ('clf', AdaBoostClassifier(n_estimators=200, learning_rate=0.8, random_state=0)),
@@ -32,27 +38,27 @@ adapip = Pipeline([
 print("Default Parameters: n_estimators=200, learning_rate=0.8")
 
 # ### PART I (Possible Bonus): Perform Training on training set, Predictions also on training set
-adapip.fit(twenty_train.data, twenty_train.target)
-pred = adapip.predict(twenty_train.data)
+adapip1.fit(twenty_train.data, twenty_train.target)
+pred = adapip1.predict(twenty_train.data)
 print("(Bonus) 20: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
 
-adapip.fit(imdb_train.data, imdb_train.target)
-pred = adapip.predict(imdb_train.data)
-print("(Bonus) imdb: Training Set Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
+adapip2.fit(imdb_train.data, imdb_train.target)
+pred = adapip2.predict(imdb_train.data)
+print("(Bonus) imdb: Training Set Accuracy:", metrics.f1_score(imdb_train.target, pred, average='macro'))
 
 
 # ### PART II (Required): Perform Training on training set, Predictions on test set
-pred = adapip.predict(twenty_test.data)
+pred = adapip1.predict(twenty_test.data)
 print("(Required) 20: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
-pred = adapip.predict(imdb_test.data)
+pred = adapip2.predict(imdb_test.data)
 print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
 
 
 ### Part III (Required): K-Fold cross validation
-print("(Required) 20: K-cv score before tuning:", cross_val_score(adapip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
+print("(Required) 20: K-cv score before tuning:", cross_val_score(adapip1, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
 
-print("(Required) imdb: K-cv score before tuning:", cross_val_score(adapip, imdb_train.data, imdb_train.target, cv=5, scoring='accuracy').mean())
+print("(Required) imdb: K-cv score before tuning:", cross_val_score(adapip2, imdb_train.data, imdb_train.target, cv=5, scoring='accuracy').mean())
 # kf = KFold(n_splits=5, random_state=None, shuffle=False)
 # print(twenty_train.data.shape)
 # for train_index, test_index in kf.split(twenty_train):
@@ -75,17 +81,17 @@ comp_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quo
 rec_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=rec)
 sci_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=sci)
 talk_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=talk)
-adapip.fit(comp_train.data, comp_train.target)
-pred = adapip.predict(comp_test.data)
+adapip1.fit(comp_train.data, comp_train.target)
+pred = adapip1.predict(comp_test.data)
 print("(Bonus) Comp. Test Set Accuracy:", metrics.f1_score(comp_test.target, pred, average='macro'))
-adapip.fit(rec_train.data, rec_train.target)
-pred = adapip.predict(rec_test.data)
+adapip1.fit(rec_train.data, rec_train.target)
+pred = adapip1.predict(rec_test.data)
 print("(Bonus) Rec. Test Set Accuracy:", metrics.f1_score(rec_test.target, pred, average='macro'))
-adapip.fit(sci_train.data, sci_train.target)
-pred = adapip.predict(sci_test.data)
+adapip1.fit(sci_train.data, sci_train.target)
+pred = adapip1.predict(sci_test.data)
 print("(Bonus) Sci. Test Set Accuracy:", metrics.f1_score(sci_test.target, pred, average='macro'))
-adapip.fit(talk_train.data, talk_train.target)
-pred = adapip.predict(talk_test.data)
+adapip1.fit(talk_train.data, talk_train.target)
+pred = adapip1.predict(talk_test.data)
 print("(Bonus) Talk. Test Set Accuracy:", metrics.f1_score(talk_test.target, pred, average='macro'))
 
 
