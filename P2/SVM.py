@@ -21,7 +21,13 @@ from sklearn.svm import LinearSVC
 
 
 # Specify pipeline
-SVMpip = Pipeline([
+SVMpip1 = Pipeline([
+('vect', CountVectorizer()),
+('tfidf', TfidfTransformer()),
+('clf', LinearSVC(random_state=0, tol=1e-5)),
+])
+
+SVMpip2 = Pipeline([
 ('vect', CountVectorizer()),
 ('tfidf', TfidfTransformer()),
 ('clf', LinearSVC(random_state=0, tol=1e-5)),
@@ -31,27 +37,27 @@ SVMpip = Pipeline([
 print("Default Parameters: tol=1e-5")
 
 ### PART I (Possible Bonus): Perform Training on training set, Predictions also on training set
-SVMpip.fit(twenty_train.data, twenty_train.target)
-pred = SVMpip.predict(twenty_train.data)
+SVMpip1.fit(twenty_train.data, twenty_train.target)
+pred = SVMpip1.predict(twenty_train.data)
 print("(Bonus) 20: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
 
-SVMpip.fit(imdb_train.data, imdb_train.target)
-pred = SVMpip.predict(imdb_train.data)
+SVMpip2.fit(imdb_train.data, imdb_train.target)
+pred = SVMpip2.predict(imdb_train.data)
 print("(Bonus) imdb: Training Set Accuracy:", metrics.f1_score(imdb_train.target, pred, average='macro'))
 
 
 ### PART II (Required): Perform Training on training set, Predictions on test set
-pred = SVMpip.predict(twenty_test.data)
+pred = SVMpip1.predict(twenty_test.data)
 print("(Required) 20: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
-pred = SVMpip.predict(imdb_test.data)
-print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(imdb_train.target, pred, average='macro'))
+pred = SVMpip2.predict(imdb_test.data)
+print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
 
 
 ### Part III (Required): K-Fold cross validation
-print("(Required) 20: K-cv score before tuning:", cross_val_score(SVMpip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
+print("(Required) 20: K-cv score before tuning:", cross_val_score(SVMpip1, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
 
-print("(Required) imdb: K-cv score before tuning:", cross_val_score(SVMpip, imdb_train.data, imdb_train.target, cv=5, scoring='accuracy').mean())
+print("(Required) imdb: K-cv score before tuning:", cross_val_score(SVMpip2, imdb_train.data, imdb_train.target, cv=5, scoring='accuracy').mean())
 # kf = KFold(n_splits=5, random_state=None, shuffle=False)
 # print(twenty_train.data.shape)
 # for train_index, test_index in kf.split(twenty_train):
@@ -75,17 +81,17 @@ comp_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quo
 rec_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=rec)
 sci_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=sci)
 talk_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=talk)
-SVMpip.fit(comp_train.data, comp_train.target)
-pred = SVMpip.predict(comp_test.data)
+SVMpip1.fit(comp_train.data, comp_train.target)
+pred = SVMpip1.predict(comp_test.data)
 print("(Bonus) Comp. Test Set Accuracy:", metrics.f1_score(comp_test.target, pred, average='macro'))
-SVMpip.fit(rec_train.data, rec_train.target)
-pred = SVMpip.predict(rec_test.data)
+SVMpip1.fit(rec_train.data, rec_train.target)
+pred = SVMpip1.predict(rec_test.data)
 print("(Bonus) Rec. Test Set Accuracy:", metrics.f1_score(rec_test.target, pred, average='macro'))
-SVMpip.fit(sci_train.data, sci_train.target)
-pred = SVMpip.predict(sci_test.data)
+SVMpip1.fit(sci_train.data, sci_train.target)
+pred = SVMpip1.predict(sci_test.data)
 print("(Bonus) Sci. Test Set Accuracy:", metrics.f1_score(sci_test.target, pred, average='macro'))
-SVMpip.fit(talk_train.data, talk_train.target)
-pred = SVMpip.predict(talk_test.data)
+SVMpip1.fit(talk_train.data, talk_train.target)
+pred = SVMpip1.predict(talk_test.data)
 print("(Bonus) Talk. Test Set Accuracy:", metrics.f1_score(talk_test.target, pred, average='macro'))
 
 
