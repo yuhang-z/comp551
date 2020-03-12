@@ -21,7 +21,13 @@ from sklearn.tree import DecisionTreeClassifier
 
 
 ### Specify pipeline
-DTpip = Pipeline([
+DTpip1 = Pipeline([
+('vect', CountVectorizer()),
+('tfidf', TfidfTransformer()),
+('clf', DecisionTreeClassifier()),
+])
+
+DTpip2 = Pipeline([
 ('vect', CountVectorizer()),
 ('tfidf', TfidfTransformer()),
 ('clf', DecisionTreeClassifier()),
@@ -31,27 +37,27 @@ DTpip = Pipeline([
 print("Default Parameters: Sklearn Defaults. The nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.")
 
 ### PART I (Possible Bonus): Perform Training on training set, Predictions also on training set
-DTpip.fit(twenty_train.data, twenty_train.target)
-pred =  DTpip.predict(twenty_train.data)
+DTpip1.fit(twenty_train.data, twenty_train.target)
+pred = DTpip1.predict(twenty_train.data)
 print("(Bonus) 20: Training Set Accuracy:", metrics.f1_score(twenty_train.target, pred, average='macro'))
 
-DTpip.fit(imdb_train.data, imdb_train.target)
-pred = DTpip.predict(imdb_train.data)
+DTpip2.fit(imdb_train.data, imdb_train.target)
+pred = DTpip2.predict(imdb_train.data)
 print("(Bonus) imdb: Training Set Accuracy:", metrics.f1_score(imdb_train.target, pred, average='macro'))
 
 
 ### PART II (Required): Perform Training on training set, Predictions on test set
-pred = DTpip.predict(twenty_test.data)
+pred = DTpip1.predict(twenty_test.data)
 print("(Required) 20: Test Set Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
-pred = DTpip.predict(imdb_test.data)
+pred = DTpip2.predict(imdb_test.data)
 print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
 
 
 ### Part III (Required): K-Fold cross validation
-print("(Required) 20: K-cv score before tuning:", cross_val_score(DTpip, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
+print("(Required) 20: K-cv score before tuning:", cross_val_score(DTpip1, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
 
-print("(Required) imdb: K-cv score before tuning:", cross_val_score(DTpip, imdb_test.data, imdb_test.target, cv=5, scoring='accuracy').mean())
+print("(Required) imdb: K-cv score before tuning:", cross_val_score(DTpip2, imdb_train.data, imdb_train.target, cv=5, scoring='accuracy').mean())
 # kf = KFold(n_splits=5, random_state=None, shuffle=False)
 # print(twenty_train.data.shape)
 # for train_index, test_index in kf.split(twenty_train):
@@ -75,17 +81,17 @@ comp_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quo
 rec_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=rec)
 sci_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=sci)
 talk_test = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), shuffle=True, categories=talk)
-DTpip.fit(comp_train.data, comp_train.target)
-pred = DTpip.predict(comp_test.data)
+DTpip1.fit(comp_train.data, comp_train.target)
+pred = DTpip1.predict(comp_test.data)
 print("(Bonus) Comp. Test Set Accuracy:", metrics.f1_score(comp_test.target, pred, average='macro'))
-DTpip.fit(rec_train.data, rec_train.target)
-pred = DTpip.predict(rec_test.data)
+DTpip1.fit(rec_train.data, rec_train.target)
+pred = DTpip1.predict(rec_test.data)
 print("(Bonus) Rec. Test Set Accuracy:", metrics.f1_score(rec_test.target, pred, average='macro'))
-DTpip.fit(sci_train.data, sci_train.target)
-pred = DTpip.predict(sci_test.data)
+DTpip1.fit(sci_train.data, sci_train.target)
+pred = DTpip1.predict(sci_test.data)
 print("(Bonus) Sci. Test Set Accuracy:", metrics.f1_score(sci_test.target, pred, average='macro'))
-DTpip.fit(talk_train.data, talk_train.target)
-pred = DTpip.predict(talk_test.data)
+DTpip1.fit(talk_train.data, talk_train.target)
+pred = DTpip1.predict(talk_test.data)
 print("(Bonus) Talk. Test Set Accuracy:", metrics.f1_score(talk_test.target, pred, average='macro'))
 
 
