@@ -58,7 +58,7 @@ print("(Required) imdb: Test Set Accuracy:", metrics.f1_score(imdb_test.target, 
 ### Part III (Required): K-Fold cross validation
 print("(Required) 20: K-cv score before tuning:", cross_val_score(RFpip1, twenty_train.data, twenty_train.target, cv=5, scoring='accuracy').mean())
 
-print("(Required) imdb: K-cv score before tuning:", cross_val_score(RFpip2, imdb_train.data, imdb_train.target, cv=5, scoring='accuracy').mean())
+# print("(Required) imdb: K-cv score before tuning:", cross_val_score(RFpip2, imdb_train.data, imdb_train.target, cv=5, scoring='accuracy').mean())
 # kf = KFold(n_splits=5, random_state=None, shuffle=False)
 # print(twenty_train.data.shape)
 # for train_index, test_index in kf.split(twenty_train):
@@ -96,27 +96,26 @@ pred = RFpip1.predict(talk_test.data)
 print("(Bonus) Talk. Test Set Accuracy:", metrics.f1_score(talk_test.target, pred, average='macro'))
 
 
+### Part V: Tuning Hyperparameters
+# k-fold validation after tuning using random search
+params = {
+    "clf__bootstrap": [False],
+    "clf__max_features": ['auto'],
+    "clf__n_estimators": [100, 200, 400],
+    "clf__min_samples_split": [8, 12, 16],
+    "clf__min_samples_leaf": [8, 12, 16],
+    }
 
-# # k-fold validation after tuning using random search
-# params = {
-#     "clf__bootstrap": [True, False],
-#     "clf__max_features": ['auto', 'sqrt'],
-#     "clf__n_estimators": [200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000],
-#     "clf__min_samples_split": [12, 14, 16, 18, 20],
-#     "clf__min_samples_leaf": [12, 14, 16, 18, 20],
-#     }
+gsearch1 = GridSearchCV(RFpip1, param_grid=params, cv=5)
+gsearch1.fit(twenty_train.data, twenty_train.target)
+print(gsearch1.best_params_)
+print(gsearch1.best_score_)
+pred = gsearch1.predict(twenty_test.data)
+print("(Required) 20: Optimal Testing Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
-# turned_rf_random = RandomizedSearchCV(RFpip, param_distributions=params, cv=5)
-
-# turned_rf_random.fit(twenty_train.data, twenty_train.target)
-# best_estimator = turned_rf_random.best_estimator_
-
-# print('Best bootstrap(random search):', turned_rf_random.best_estimator_.get_params()['clf__bootstrap'])
-# print('Best max_features(random search):', turned_rf_random.best_estimator_.get_params()['clf__max_features'])
-# print('Best n_estimators(random search):', turned_rf_random.best_estimator_.get_params()['clf__n_estimators'])
-# print('Best min_samples_split(random search):', turned_rf_random.best_estimator_.get_params()['clf__min_samples_split'])
-# print('Best min_samples_leaf(random search):', turned_rf_random.best_estimator_.get_params()['clf__min_samples_leaf'])
-
-# y_estimated = turned_rf_random.predict(twenty_test.data)
-# acc = np.mean(y_estimated == twenty_test.target)
-# print("Accuracy after tuning:{}".format(acc))
+gsearch2 = GridSearchCV(RFpip2, param_grid=params, cv=5)
+gsearch2.fit(imdb_train.data, imdb_train.target)
+print(gsearch2.best_params_)
+print(gsearch2.best_score_)
+pred = gsearch2.predict(imdb_test.data)
+print("(Required) imdb: Optimal Testing Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
