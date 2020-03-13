@@ -95,27 +95,24 @@ pred = SVMpip1.predict(talk_test.data)
 print("(Bonus) Talk. Test Set Accuracy:", metrics.f1_score(talk_test.target, pred, average='macro'))
 
 
+### Part V: Tuning Hyperparameters
+# k-fold validation after tuning using random search
+params = {
+    "clf__C": [1, 2],
+    "clf__tol": [1e-3, 1e-4, 1e-5],
+    "clf__max_iter": [500, 1000, 1500]
+    }
 
-# # k-fold validation after tuning using random search
-# params = {
-#     "clf__C": [1, 2, 3],
-#     "clf__loss": ['hinge', 'squared_hinge'],
-#     "clf__max_iter": [1000, 2000, 3000],
-#     "clf__fit_intercept": [True, False],
-#     "clf__multi_class": ['ovr', 'crammer_singer']
-#     }
+gsearch1 = GridSearchCV(SVMpip1, param_grid=params, cv=5)
+gsearch1.fit(twenty_train.data, twenty_train.target)
+print(gsearch1.best_params_)
+print(gsearch1.best_score_)
+pred = gsearch1.predict(twenty_test.data)
+print("(Required) 20: Optimal Testing Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
-# turned_svm_random = RandomizedSearchCV(SVMpip, param_distributions=params, cv=5, verbose=10, random_state=42, n_jobs=-1)
-
-# turned_svm_random.fit(twenty_train.data, twenty_train.target)
-# best_estimator = turned_svm_random.best_estimator_
-
-# print('Best C(random search):', turned_svm_random.best_estimator_.get_params()['clf__C'])
-# print('Best loss(random search):', turned_svm_random.best_estimator_.get_params()['clf__loss'])
-# print('Best max_iter(random search):', turned_svm_random.best_estimator_.get_params()['clf__max_iter'])
-# print('Best fit_intercept(random search):', turned_svm_random.best_estimator_.get_params()['clf__fit_intercept'])
-# print('Best multi_class(random search):', turned_svm_random.best_estimator_.get_params()['clf__multi_class'])
-
-# y_estimated = turned_svm_random.predict(twenty_test.data)
-# acc = np.mean(y_estimated == twenty_test.target)
-# print("Accuracy after tuning:{}".format(acc))
+gsearch2 = GridSearchCV(SVMpip2, param_grid=params, cv=5)
+gsearch2.fit(imdb_train.data, imdb_train.target)
+print(gsearch2.best_params_)
+print(gsearch2.best_score_)
+pred = gsearch2.predict(imdb_test.data)
+print("(Required) imdb: Optimal Testing Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
