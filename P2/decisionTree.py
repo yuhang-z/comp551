@@ -95,28 +95,24 @@ pred = DTpip1.predict(talk_test.data)
 print("(Bonus) Talk. Test Set Accuracy:", metrics.f1_score(talk_test.target, pred, average='macro'))
 
 
+### Part V: Tuning Hyperparameters
+# k-fold validation after tuning using random search
+params = {
+    "clf__max_depth": [200, 400, 600],
+    "clf__min_samples_split": [8, 12, 16],
+    "clf__min_samples_leaf": [8, 12, 16],
+    }
 
-# # k-fold validation after tuning using random search
-# params = {
-#     "clf__max_depth": [400],
-#     "clf__max_features": [None, 'auto', 'log2'],
-#     "clf__criterion": ["gini", "entropy"],
-#     "clf__min_samples_split": [14, 15, 16, 17, 18, 19, 20, 21, 22],
-#     "clf__min_samples_leaf": [12, 14, 16, 17, 18, 19, 20, 22, 24],
-#     "clf__class_weight": ["balanced", None]
-#     }
+gsearch1 = GridSearchCV(DTpip1, param_grid=params, cv=5)
+gsearch1.fit(twenty_train.data, twenty_train.target)
+print(gsearch1.best_params_)
+print(gsearch1.best_score_)
+pred = gsearch1.predict(twenty_test.data)
+print("(Required) 20: Optimal Testing Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
-# turned_dt_random = RandomizedSearchCV(DTpip, param_distributions=params, cv=5)
-
-# turned_dt_random.fit(twenty_train.data, twenty_train.target)
-# best_estimator = turned_dt_random.best_estimator_
-
-# print('Best max_features(random search):', turned_dt_random.best_estimator_.get_params()['clf__max_features'])
-# print('Best criterion(random search):', turned_dt_random.best_estimator_.get_params()['clf__criterion'])
-# print('Best min_samples_split(random search):', turned_dt_random.best_estimator_.get_params()['clf__min_samples_split'])
-# print('Best min_samples_leaf(random search):', turned_dt_random.best_estimator_.get_params()['clf__min_samples_leaf'])
-# print('Best class_weight(random search):', turned_dt_random.best_estimator_.get_params()['clf__class_weight'])
-
-# y_estimated = turned_dt_random.predict(twenty_test.data)
-# acc = np.mean(y_estimated == twenty_test.target)
-# print("Accuracy after tuning:{}".format(acc))
+gsearch2 = GridSearchCV(DTpip2, param_grid=params, cv=5)
+gsearch2.fit(imdb_train.data, imdb_train.target)
+print(gsearch2.best_params_)
+print(gsearch2.best_score_)
+pred = gsearch2.predict(imdb_test.data)
+print("(Required) imdb: Optimal Testing Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
