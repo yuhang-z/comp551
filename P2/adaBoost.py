@@ -96,25 +96,22 @@ print("(Bonus) Talk. Test Set Accuracy:", metrics.f1_score(talk_test.target, pre
 
 
 ### Part V (Required): Parameter tuning using kcv
+# k-fold validation after tuning using random search
+params = {
+    "clf__n_estimators": [100, 200, 300],
+    "clf__learning_rate": [0.4, 0.8, 1.2],
+    }
 
-# # k-fold validation after tuning using random search
-# params = {
-#     "clf__n_estimators": [50, 100],
-#     "clf__learning_rate": [0.01, 0.05, 0.1, 0.3, 1],
-#     #"clf__loss": ['linear', 'square', 'exponential'],
-#     "clf__algorithm": ['SAMME', 'SAMME.R']
-#     }
+gsearch1 = GridSearchCV(adapip1, param_grid=params, cv=5)
+gsearch1.fit(twenty_train.data, twenty_train.target)
+print(gsearch1.best_params_)
+print(gsearch1.best_score_)
+pred = gsearch1.predict(twenty_test.data)
+print("(Required) 20: Optimal Testing Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
-# turned_dt_random = RandomizedSearchCV(adapip, param_distributions=params, cv=5)
-
-# turned_dt_random.fit(twenty_train.data, twenty_train.target)
-# best_estimator = turned_dt_random.best_estimator_
-
-# print('Best n_estimators(random search):', turned_dt_random.best_estimator_.get_params()['clf__n_estimators'])
-# print('Best learning_rate(random search):', turned_dt_random.best_estimator_.get_params()['clf__learning_rate'])
-# #print('Best loss(random search):', turned_dt_random.best_estimator_.get_params()['clf__loss'])
-# print('Best algorithm(random search):', turned_dt_random.best_estimator_.get_params()['clf__algorithm'])
-
-# y_estimated = turned_dt_random.predict(twenty_test.data)
-# acc = np.mean(y_estimated == twenty_test.target)
-# print("Accuracy after tuning:{}".format(acc))
+gsearch2 = GridSearchCV(adapip2, param_grid=params, cv=5)
+gsearch2.fit(imdb_train.data, imdb_train.target)
+print(gsearch2.best_params_)
+print(gsearch2.best_score_)
+pred = gsearch2.predict(imdb_test.data)
+print("(Required) imdb: Optimal Testing Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))

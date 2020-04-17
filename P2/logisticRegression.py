@@ -98,22 +98,22 @@ pred = LRpip1.predict(talk_test.data)
 print("(Bonus) Talk. Test Set Accuracy:", metrics.f1_score(talk_test.target, pred, average='macro'))
 
 
-# # k-fold validation after tuning using random search
-# params = {
-#     "clf__penalty": ['l1', 'l2'],
-#     "clf__C": [1.0, 2.0, 3.0],
-#     "clf__max_iter": [1000, 2000, 3000]
-#     }
+### Part V: Tuning Hyperparameters
+# k-fold validation after tuning using random search
+params = {
+    "clf__solver": ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
+    }
 
-# turned_lr_random = RandomizedSearchCV(LRpip, param_distributions=params, cv=5)
+gsearch1 = GridSearchCV(LRpip1, param_grid=params, cv=5)
+gsearch1.fit(twenty_train.data, twenty_train.target)
+print(gsearch1.best_params_)
+print(gsearch1.best_score_)
+pred = gsearch1.predict(twenty_test.data)
+print("(Required) 20: Optimal Testing Accuracy:", metrics.f1_score(twenty_test.target, pred, average='macro'))
 
-# turned_lr_random.fit(twenty_train.data, twenty_train.target)
-# best_estimator = turned_lr_random.best_estimator_
-
-# print('Best Penalty(random search):', turned_lr_random.best_estimator_.get_params()['clf__penalty'])
-# print('Best C(random search):', turned_lr_random.best_estimator_.get_params()['clf__C'])
-# print('Best iteration(random search):', turned_lr_random.best_estimator_.get_params()['clf__max_iter'])
-
-# y_estimated = turned_lr_random.predict(twenty_test.data)
-# acc = np.mean(y_estimated == twenty_test.target)
-# print("Accuracy after tuning:{}".format(acc))
+gsearch2 = GridSearchCV(LRpip2, param_grid=params, cv=5)
+gsearch2.fit(imdb_train.data, imdb_train.target)
+print(gsearch2.best_params_)
+print(gsearch2.best_score_)
+pred = gsearch2.predict(imdb_test.data)
+print("(Required) imdb: Optimal Testing Accuracy:", metrics.f1_score(imdb_test.target, pred, average='macro'))
